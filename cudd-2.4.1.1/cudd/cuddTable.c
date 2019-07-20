@@ -752,6 +752,11 @@ cuddGarbageCollect(
 	cuddLocalCacheClearDead(unique);
     }
 
+    /* Graded CTL package of NuSMV: added begin */
+    GradedUtils_cacheFreeDeadNodes();
+    /* Graded CTL package of NuSMV: added end */
+
+
     /* Now return dead nodes to free list. Count them for sanity check. */
     totalDeleted = 0;
 #ifndef DD_UNSORTED_FREE_LIST

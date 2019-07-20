@@ -196,6 +196,12 @@ void HrcNode_cleanup(HrcNode_ptr self)
   self->ctl_props = Olist_create();
   FREELIST_AND_SET_TO_NIL(self->ltl_props);
   self->ltl_props = Olist_create();
+
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  FREELIST_AND_SET_TO_NIL(self->gradspec_props);
+  self->gradspec_props = Olist_create();
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
   FREELIST_AND_SET_TO_NIL(self->psl_props);
   self->psl_props = Olist_create();
   FREELIST_AND_SET_TO_NIL(self->invar_props);
@@ -1004,6 +1010,41 @@ void HrcNode_add_ltl_property_expr(HrcNode_ptr self, node_ptr ltl)
 #endif
 }
 
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void HrcNode_replace_gradspec_properties(HrcNode_ptr self, Olist_ptr gradspecs)
+{
+  HRC_NODE_CHECK_INSTANCE(self);
+  nusmv_assert(OLIST(NULL) != gradspecs);
+
+  FREELIST_AND_SET_TO_NIL(self->gradspec_props);
+
+  self->gradspec_props = gradspecs;
+}
+
+Oiter HrcNode_get_gradspec_properties_iter(const HrcNode_ptr self)
+{
+  HRC_NODE_CHECK_INSTANCE(self);
+
+  return Olist_first(self->gradspec_props);
+}
+
+void HrcNode_add_gradspec_property_expr(HrcNode_ptr self, node_ptr gradspec)
+{
+  HRC_NODE_CHECK_INSTANCE(self);
+  nusmv_assert(Nil == gradspec || CTLGSPEC == node_get_type(gradspec));
+
+#if HRC_NODE_AVOID_DUPLICATION
+  if (!Olist_contains(self->gradspec_props, gradspec)) {
+    Olist_append(self->gradspec_props, gradspec);
+  }
+#else
+  Olist_append(self->gradspec_props, ltl);
+#endif
+}
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+
 void HrcNode_replace_psl_properties(HrcNode_ptr self, Olist_ptr psls)
 {
   HRC_NODE_CHECK_INSTANCE(self);
@@ -1256,6 +1297,11 @@ HrcNode_ptr HrcNode_copy(const HrcNode_ptr self)
   hrc_copy->justice = Olist_copy(self->justice);
   hrc_copy->constants = Olist_copy(self->constants);
   hrc_copy->ctl_props = Olist_copy(self->ctl_props);
+
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  hrc_copy->gradspec_props = Olist_copy(self->gradspec_props);
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
   hrc_copy->ltl_props = Olist_copy(self->ltl_props);
   hrc_copy->psl_props = Olist_copy(self->psl_props);
   hrc_copy->invar_props = Olist_copy(self->invar_props);
@@ -1671,6 +1717,9 @@ void hrc_node_init(HrcNode_ptr self, const NuSMVEnv_ptr env)
   self->constants = Olist_create();
   self->invar_props = Olist_create();
   self->ctl_props = Olist_create();
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  self->gradspec_props= Olist_create();
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   self->ltl_props = Olist_create();
   self->psl_props = Olist_create();
   self->compute_props = Olist_create();
@@ -1711,6 +1760,11 @@ void hrc_node_deinit(HrcNode_ptr self)
   FREELIST_AND_SET_TO_NIL(self->constants);
   FREELIST_AND_SET_TO_NIL(self->ctl_props);
   FREELIST_AND_SET_TO_NIL(self->ltl_props);
+
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  FREELIST_AND_SET_TO_NIL(self->gradspec_props);
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
   FREELIST_AND_SET_TO_NIL(self->psl_props);
   FREELIST_AND_SET_TO_NIL(self->invar_props);
   FREELIST_AND_SET_TO_NIL(self->compute_props);

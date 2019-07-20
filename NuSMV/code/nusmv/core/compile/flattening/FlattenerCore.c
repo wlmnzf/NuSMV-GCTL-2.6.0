@@ -1551,6 +1551,27 @@ node_ptr flattener_core_flatten(FlattenerBase_ptr self,
       break;
     }
 
+
+
+          /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+          /* CTL graded Temporal Operators */
+    case EGX:
+    case EGG:
+    case EGU:
+    case EGF:
+    case AGX:
+    case AGG:
+    case AGU:
+    case AGF:
+    {
+      node_ptr left  = _THROW(car(sexp), symb_table, def_hash, context, mode);
+      node_ptr right = _THROW(cdr(sexp), symb_table, def_hash, context, mode);
+
+      result = new_node(nodemgr, node_get_type(sexp), left, right);
+      break;
+    }
+          /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
     /* LTL unary temporal operators */
   case OP_NEXT:
   case OP_PREC:

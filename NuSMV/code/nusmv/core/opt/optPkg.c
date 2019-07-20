@@ -236,6 +236,14 @@ void Opt_Pkg_init(NuSMVEnv_ptr const env)
   nusmv_assert(res);
 
   /* Those below are batch related */
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  res = OptsHandler_register_bool_option(opts, IGNORE_GRADSPEC, false, false);
+  nusmv_assert(res);
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+
+
   res = OptsHandler_register_bool_option(opts, IGNORE_SPEC, false, false);
   nusmv_assert(res);
 

@@ -52,6 +52,7 @@ set(SRC
   cuddZddSetop.c
   cuddZddSymm.c
   cuddZddUtil.c
+  GradedUtilsCache.c
   )
 
 cudd_add_headers(cudd.h cuddInt.h)

@@ -40,6 +40,7 @@
 
 #include "nusmv/core/cinit/cinit.h"
 #include "nusmv/core/cinit/cinitInt.h"
+#include "nusmv/core/graded/mc/GradedCtl.h"
 
 #include "nusmv/core/utils/OStream.h"
 #include "nusmv/core/utils/StreamMgr.h"
@@ -396,6 +397,13 @@ void CInit_batch_main(NuSMVEnv_ptr env)
         if (!opt_ignore_compute(opts)) {
           res |= PropDb_check_property(prop_db, Prop_Compute, NULL, prop_no);
         }
+
+        /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+        /* Evaluates the GCTL Specifications */
+        if (!opt_ignore_gradspec(opts)) {
+            res |= PropDb_check_property(prop_db, Prop_Ctlg, NULL, prop_no);
+        }
+        /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
         if (!opt_ignore_ltlspec(opts)) {
           res |= PropDb_check_property(prop_db, Prop_Ltl, NULL, prop_no);
         }

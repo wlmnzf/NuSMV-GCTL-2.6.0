@@ -226,13 +226,22 @@ int CommandShowProperty(NuSMVEnv_ptr env, int argc, char** argv)
   PropDb_ptr prop_db = PROP_DB(NuSMVEnv_get_value(env, ENV_PROP_DB));
 
   util_getopt_reset();
-  while((c = util_getopt(argc, argv, "hlciqutfn:vmo:F:sP:")) != EOF){
+  while((c = util_getopt(argc, argv, "hlcgiqutfn:vmo:F:sP:")) != EOF){
     switch(c){
     case 'h':
       {
         if (outFileName != NIL(char)) FREE(outFileName);
         return(UsageShowProperty(env));
       }
+            /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+      case 'g':
+      {
+        if ((type != Prop_NoType) || (prop_no != -1))
+          return(UsageShowProperty(env));
+        type = Prop_Ctlg;
+        break;
+      }
+            /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     case 'c':
       {
         if ((type != Prop_NoType) || (prop_no != -1)) {
@@ -457,10 +466,13 @@ int CommandShowProperty(NuSMVEnv_ptr env, int argc, char** argv)
 static int UsageShowProperty(const NuSMVEnv_ptr env)
 {
   StreamMgr_ptr streams = STREAM_MGR(NuSMVEnv_get_value(env, ENV_STREAM_MANAGER));
-  StreamMgr_print_error(streams,  "usage: show_property [-h] [ [[-c | -l | -i | -q] [-u | -t | -f]] | [-n index] | [-P name] ] \n");
+  StreamMgr_print_error(streams,  "usage: show_property [-h] [ [[-c | -g | -l | -i | -q] [-u | -t | -f]] | [-n index] | [-P name] ] \n");
   StreamMgr_print_error(streams,  "\t\t [-m | -o file] [-F format]\n");
   StreamMgr_print_error(streams,  "  -h \t\tPrints the command usage.\n");
   StreamMgr_print_error(streams,  "  -c \t\tPrints only CTL properties.\n");
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  StreamMgr_print_error(streams,  "  -g \t\tPrints only Graded CTL properties.\\n");
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   StreamMgr_print_error(streams,  "  -l \t\tPrints only LTL properties.\n");
   StreamMgr_print_error(streams,  "  -i \t\tPrints only INVAR properties.\n");
   StreamMgr_print_error(streams,  "  -q \t\tPrints only quantitative properties (COMPUTE).\n");
@@ -530,7 +542,7 @@ int CommandAddProperty (NuSMVEnv_ptr env, int argc, char** argv)
     SYMB_TABLE(NuSMVEnv_get_value(env, ENV_SYMB_TABLE));
 
   util_getopt_reset();
-  while((c = util_getopt(argc, argv, "hlcisqp:n:")) != EOF){
+  while((c = util_getopt(argc, argv, "hlcgisqp:n:")) != EOF){
     switch(c){
     case 'h': return(UsageAddProperty(env));
     case 'l':
@@ -541,6 +553,12 @@ int CommandAddProperty (NuSMVEnv_ptr env, int argc, char** argv)
       if (++usedType > 1) return(UsageAddProperty(env));
       type = Prop_Ctl;
       break;
+            /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+      case 'g':
+        if (++usedType > 1) return(UsageAddProperty(env));
+            type = Prop_Ctlg;
+            break;
+            /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     case 'i':
       if (++usedType > 1) return(UsageAddProperty(env));
       type = Prop_Invar;
@@ -628,6 +646,9 @@ static int UsageAddProperty(const NuSMVEnv_ptr env)
           " -p \"formula\" [IN context] ] [-n \"name\"]\n");
   StreamMgr_print_error(streams,  "  -h \t\tPrints the command usage.\n");
   StreamMgr_print_error(streams,  "  -c \t\tAdds a CTL property.\n");
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  StreamMgr_print_error(streams,  "  -g \t\tAdds a Graded CTL properties.\n");
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   StreamMgr_print_error(streams,  "  -l \t\tAdds an LTL property.\n");
   StreamMgr_print_error(streams,  "  -i \t\tAdds an INVAR property.\n");
   StreamMgr_print_error(streams,  "  -s \t\tAdds a PSL property.\n");
@@ -696,7 +717,7 @@ int CommandCheckProperty (NuSMVEnv_ptr env, int argc, char** argv)
   PropDb_ptr prop_db = PROP_DB(NuSMVEnv_get_value(env, ENV_PROP_DB));
 
   util_getopt_reset();
-  while((c = util_getopt(argc, argv, "hn:p:clisqP:")) != EOF){
+  while((c = util_getopt(argc, argv, "hn:p:cglisqP:")) != EOF){
     switch(c){
     case 'h': return(UsageCheckProperty(env));
     case 'n':
@@ -747,6 +768,16 @@ int CommandCheckProperty (NuSMVEnv_ptr env, int argc, char** argv)
         pt = Prop_Ctl;
         break;
       }
+            /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+      case 'g':
+      {
+        if (prop_no != -1 || pt != Prop_NoType) {
+          return(UsageCheckProperty(env));
+        }
+        pt = Prop_Ctlg;
+        break;
+      }
+            /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     case 'l':
       {
         if (prop_no != -1 || pt != Prop_NoType) {
@@ -805,6 +836,9 @@ static int UsageCheckProperty(const NuSMVEnv_ptr env)
   StreamMgr_print_error(streams,  "  -n number \t Checks property number.\n");
   StreamMgr_print_error(streams,  "  -P \"name\" \t Checks property name.\n");
   StreamMgr_print_error(streams,  "  -c \t\t Checks CTL properties.\n");
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  StreamMgr_print_error(streams,  "  -g \t\t Checks Graded CTL properties.\n");
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   StreamMgr_print_error(streams,  "  -l \t\t Checks LTL properties.\n");
   StreamMgr_print_error(streams,  "  -i \t\t Checks INVAR properties.\n");
   StreamMgr_print_error(streams,  "  -s \t\t Checks PSL properties.\n");

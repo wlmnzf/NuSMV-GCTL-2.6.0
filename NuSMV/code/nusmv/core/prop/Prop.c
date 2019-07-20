@@ -71,6 +71,7 @@
 #include "nusmv/core/parser/parser.h"
 
 #include <string.h>
+#include <nusmv/core/graded/mc/GradedCtl.h>
 
 /*---------------------------------------------------------------------------*/
 /* Constant declarations                                                     */
@@ -1509,6 +1510,9 @@ void prop_verify(Prop_ptr self)
       else { Mc_CheckCTLSpec(env, self); }
       break;
 
+            /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    case Prop_Ctlg:   GradedMc_checkGradedCtlSpec(env,self); break;
+            /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     case Prop_Compute:  Mc_CheckCompute(env, self); break;
 
     case Prop_Invar:    Mc_CheckInvar(env, self); break;
@@ -1545,6 +1549,9 @@ const char* PropType_to_string(const Prop_Type type)
   switch (type) {
   case Prop_NoType:  res = PROP_NOTYPE_STRING; break;
   case Prop_Ctl:     res = PROP_CTL_STRING; break;
+          /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  case Prop_Ctlg:     res = PROP_GCTL_STRING; break;
+          /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   case Prop_Ltl:     res = PROP_LTL_STRING; break;
   case Prop_Psl:     res = PROP_PSL_STRING; break;
   case Prop_Invar:   res = PROP_INVAR_STRING; break;

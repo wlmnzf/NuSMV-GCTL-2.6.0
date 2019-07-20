@@ -189,6 +189,12 @@ extern "C" {
 #define DD_BDD_LEQ_UNLESS_TAG			0x82
 #define DD_ADD_TRIANGLE_TAG			0x86
 
+/* Graded CTL package of NuSMV: added begin */
+#define DD_ADD_NODE_TIMES_TAG			0x8a
+#define DD_ADD_NODE_PLUS_TAG			0x8e
+#define DD_ADD_NODE_ANDABSTRACT_TAG		0xa2
+/* Graded CTL package of NuSMV: added end */
+
 /* Generator constants. */
 #define CUDD_GEN_CUBES 0
 #define CUDD_GEN_PRIMES 1
@@ -309,6 +315,20 @@ typedef struct DdCache {
     ptrint count;
 #endif
 } DdCache;
+
+/* Graded CTL package of NuSMV: added begin */
+#ifndef _GRADEDCACHE_
+
+#define _GRADEDCACHE_
+
+typedef struct GradedCache {
+    DdNode *f,*g;		/* DDs */
+    DdNode *h;			/* either operator or DD */
+    DdNode *i;
+    DdNode *data;		/* already constructed DD */
+} GradedCache;
+#endif
+/* Graded CTL package of NuSMV: added end */
 
 typedef struct DdSubtable {	/* subtable for one index */
     DdNode **nodelist;		/* hash table */
@@ -783,6 +803,54 @@ typedef struct DdLevelQueue {
           #endif */
 /* NuSMV: add end */
 
+
+/* Graded CTL package of NuSMV: added begin */
+/**Macro***********************************************************************
+
+  Synopsis    [Hash function for the graded cache.]
+
+  Description []
+
+  SideEffects [none]
+
+  SeeAlso     [Graded_CHash3]
+
+******************************************************************************/
+#if SIZEOF_VOID_P == 8 && SIZEOF_INT == 4
+#define Graded_CHash(o,f,g,h) \
+((((((unsigned)(unsigned long)(f) + (unsigned)(unsigned long)(o)) * DD_P1 + \
+    (unsigned)(unsigned long)(g)) * DD_P2 + \
+   (unsigned)(unsigned long)(h)) * DD_P3) >> (cacheShift))
+#else
+#define Graded_CHash(o,f,g,h) \
+((((((unsigned)(f) + (unsigned)(o)) * DD_P1 + (unsigned)(g)) * DD_P2 + \
+   (unsigned)(h)) * DD_P3) >> (cacheShift))
+#endif
+
+
+/**Macro***********************************************************************
+
+  Synopsis    [Graded Hash function for the cache for functions with three
+  operands.]
+
+  Description []
+
+  SideEffects [none]
+
+  SeeAlso     [Graded_CHash]
+
+******************************************************************************/
+#if SIZEOF_VOID_P == 8 && SIZEOF_INT == 4
+#define Graded_CHash3(o,f,g) \
+(((((unsigned)(unsigned long)(f) + (unsigned)(unsigned long)(o)) * DD_P1 + \
+   (unsigned)(unsigned long)(g)) * DD_P2) >> (cacheShift))
+#else
+#define Graded_CHash3(o,f,g) \
+(((((unsigned)(f) + (unsigned)(o)) * DD_P1 + (unsigned)(g)) * DD_P2) >> (cacheShift))
+#endif
+
+/* Graded CTL package of NuSMV: added end */
+
 /**Macro***********************************************************************
 
   Synopsis    [Clears the 4 least significant bits of a pointer.]
@@ -1142,6 +1210,27 @@ extern int cuddCacheProfile (DdManager *table, FILE *fp);
 extern void cuddCacheResize (DdManager *table);
 extern void cuddCacheFlush (DdManager *table);
 extern int cuddComputeFloorLog2 (unsigned int value);
+
+
+
+
+/* Graded CTL package of NuSMV: added begin */
+
+extern int GradedUtils_cacheInit();
+extern void GradedUtils_cacheFlush();
+extern void GradedUtils_cacheFreeDeadNodes();
+//extern void GradedUtils_cacheInsert4(unsigned int, DdNode *, DdNode *, DdNode *, DdNode *, DdNode *);
+//extern void GradedUtils_cacheInsert3(unsigned int, DdNode *, DdNode *, DdNode *, DdNode *);
+//extern DdNode * GradedUtils_cacheLookup4(DdManager *, unsigned int, DdNode *, DdNode *, DdNode *, DdNode *);
+//extern DdNode * GradedUtils_cacheLookup3(DdManager *, unsigned int, DdNode *, DdNode *, DdNode *);
+
+/* Graded CTL package of NuSMV: added end */
+
+
+
+
+
+
 extern int cuddHeapProfile (DdManager *dd);
 extern void cuddPrintNode (DdNode *f, FILE *fp);
 extern void cuddPrintVarGroups (DdManager * dd, MtrNode * root, int zdd, int silent);

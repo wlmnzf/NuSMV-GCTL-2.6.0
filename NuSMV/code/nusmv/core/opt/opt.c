@@ -378,6 +378,27 @@ int opt_shown_states_level(OptsHandler_ptr opt)
 }
 
 /******************************************************************************/
+/* IGNORE_GRADSPEC */
+void set_ignore_gradspec(OptsHandler_ptr opt)
+{
+  boolean res = OptsHandler_set_bool_option_value(opt, IGNORE_GRADSPEC, true);
+  nusmv_assert(res);
+}
+
+void unset_ignore_gradspec(OptsHandler_ptr opt)
+{
+  boolean res = OptsHandler_set_bool_option_value(opt, IGNORE_GRADSPEC, false);
+  nusmv_assert(res);
+}
+
+boolean opt_ignore_gradspec(OptsHandler_ptr opt)
+{
+  return OptsHandler_get_bool_option_value(opt, IGNORE_GRADSPEC);
+}
+
+
+
+/******************************************************************************/
 /* IGNORE_SPEC */
 void set_ignore_spec(OptsHandler_ptr opt)
 {

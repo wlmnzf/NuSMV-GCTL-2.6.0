@@ -83,7 +83,7 @@ static node_ptr node2maincontext(node_ptr node);
    NB: This checking function could also be a part of the type checker,
    but it is more straightforward to write a separate function.
 */
-  enum EXP_KIND {EXP_SIMPLE, EXP_NEXT, EXP_LTL, EXP_CTL};
+  enum EXP_KIND {EXP_SIMPLE, EXP_NEXT, EXP_LTL, EXP_CTL, EXP_CTLG};
 
   static boolean isCorrectExp(node_ptr exp, enum EXP_KIND expectedKind);
 
@@ -115,7 +115,7 @@ static node_ptr node2maincontext(node_ptr node);
 
 %left <lineno> TOK_CONSTRAINT TOK_ITYPE
 %left <lineno> TOK_MODULE TOK_PROCESS TOK_CONTEXT TOK_EU TOK_AU TOK_EBU TOK_ABU TOK_MINU TOK_MAXU
-%left <lineno> TOK_VAR TOK_FROZENVAR TOK_IVAR TOK_FUN TOK_DEFINE TOK_ARRAY_DEFINE TOK_INIT TOK_TRANS TOK_INVAR TOK_SPEC TOK_CTLSPEC TOK_LTLSPEC TOK_COMPUTE TOK_NAME
+%left <lineno> TOK_VAR TOK_FROZENVAR TOK_IVAR TOK_FUN TOK_DEFINE TOK_ARRAY_DEFINE TOK_INIT TOK_TRANS TOK_INVAR TOK_SPEC TOK_CTLSPEC TOK_CTLGSPEC TOK_LTLSPEC TOK_COMPUTE TOK_NAME
 %left <lineno> TOK_PSLSPEC
 %left <lineno> TOK_CONSTANTS
 %left <lineno> TOK_INVARSPEC TOK_FAIRNESS TOK_COMPASSION TOK_JUSTICE 
@@ -125,7 +125,7 @@ static node_ptr node2maincontext(node_ptr node);
 %left <lineno> TOK_EQDEF TOK_TWODOTS
 %left <lineno> TOK_SELF 
 %left <lineno> TOK_CASE TOK_ESAC TOK_COLON
-%left <lineno> TOK_INCONTEXT TOK_SIMPWFF TOK_NEXTWFF TOK_LTLWFF TOK_LTLPSL TOK_CTLWFF TOK_COMPWFF TOK_COMPID
+%left <lineno> TOK_INCONTEXT TOK_SIMPWFF TOK_NEXTWFF TOK_LTLWFF TOK_LTLPSL TOK_CTLWFF TOK_COMPWFF TOK_COMPID TOK_CTLGWFF
 %left <lineno> TOK_ARRAY  TOK_BOOLEAN TOK_WORD
 %left <lineno> TOK_BOOL TOK_WORD1
 %left <lineno> TOK_CONST_ARRAY TOK_WAREAD TOK_WAWRITE
@@ -155,13 +155,13 @@ static node_ptr node2maincontext(node_ptr node);
 /* all nonterminals return a parse tree node */
 %type <node> number integer number_word number_frac number_real number_exp subrange subrangetype
 
-%type <node> constant primary_expr case_element_expr case_element_list_expr count_param_list
+%type <node> constant primary_expr primg_expr case_element_expr case_element_list_expr count_param_list
 %type <node> concatination_expr multiplicative_expr
 
 %type <node> primary_expr_type concatination_expr_type multiplicative_expr_type additive_expr_type shift_expr_type
 
 %type <node> additive_expr shift_expr
-%type <node> set_expr set_list_expr union_expr in_expr relational_expr 
+%type <node> set_expr setg_expr set_list_expr setg_list_expr union_expr in_expr uniong_expr relational_expr ing_expr relationalg_expr
 %type <node> ctl_expr pure_ctl_expr ctl_and_expr
 %type <node> ctl_or_expr ctl_iff_expr ctl_implies_expr ctl_basic_expr
 %type <node> ltl_binary_expr ltl_unary_expr pure_ltl_unary_expr
@@ -169,6 +169,11 @@ static node_ptr node2maincontext(node_ptr node);
 %type <node> simple_expression next_expression ctl_expression ltl_expression
 
 %type <node> nfun_type nfun_ftype nfunc_expr 
+
+ /********************************************************/
+%type <node> ctlg_expr pure_ctlg_expr ctlg_basic_expr
+ //%type <node> ctlg_or_expr ctlg_iff_expr ctlg_implies_expr ctlg_and_expr
+
 
 %type <node> itype type module_type 
 %type <node> type_value_list type_value complex_atom next_list_expression
@@ -184,8 +189,8 @@ static node_ptr node2maincontext(node_ptr node);
 %type <node> assign assign_list one_assign
 %type <node> init invar trans
 %type <node> fairness justice compassion
-%type <node> invarspec ctlspec ltlspec pslspec compute
-%type <node> _invarspec _ctlspec _ltlspec _compute
+%type <node> invarspec ctlspec ctlgspec ltlspec pslspec compute
+%type <node> _invarspec _ctlspec _ltlspec _compute _ctlgspec
 %type <node> constants constants_expression
 %type <node> compute_expression
 %type <node> isa

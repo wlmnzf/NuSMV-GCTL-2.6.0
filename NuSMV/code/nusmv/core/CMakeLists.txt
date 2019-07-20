@@ -23,6 +23,7 @@ set(SUBDIRS
   sexp
   hrc
   wff
+  graded
   )
 
 foreach(_d ${SUBDIRS})

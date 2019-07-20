@@ -193,6 +193,11 @@ checker_statement_check_expr(CheckerBase_ptr self,
   case SPEC:
   case LTLSPEC:
   case PSLSPEC:
+
+    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  case CTLGSPEC:
+    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
   case INVARSPEC:
   case ISA:
   case CONSTRAINT:
@@ -461,6 +466,11 @@ checker_statement_viol_handler(CheckerBase_ptr self,
     case JUSTICE:
     case COMPASSION:
     case SPEC:
+
+      /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    case CTLGSPEC:
+      /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
     case LTLSPEC:
     case PSLSPEC:
     case INVARSPEC:

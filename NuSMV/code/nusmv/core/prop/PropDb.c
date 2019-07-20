@@ -135,7 +135,7 @@ void PropDb_clean(PropDb_ptr self)
 
 int PropDb_fill(PropDb_ptr self, SymbTable_ptr symb_table,
                 node_ptr ctlspec, node_ptr computespec,
-                node_ptr ltlspec, node_ptr pslspec,
+                node_ptr ltlspec,node_ptr ctlgspec, node_ptr pslspec,
                 node_ptr invarspec)
 {
   node_ptr l;
@@ -181,6 +181,14 @@ int PropDb_fill(PropDb_ptr self, SymbTable_ptr symb_table,
       Prop_set_name(prop, cdr(car(l)));
     }
   }
+
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  for(l = ctlgspec; l != Nil; l = cdr(l)) {
+    res = PropDb_prop_create_and_add(self,symb_table, car(l), Prop_Ctlg);
+    if (res == -1) return 1;
+  }
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
   for (l = pslspec; l != Nil; l = cdr(l)) {
     res = PropDb_prop_create_and_add(self, symb_table,
                                      car(car(l)), Prop_Psl);
@@ -1033,7 +1041,7 @@ int prop_db_prop_create_and_add(PropDb_ptr self, SymbTable_ptr symb_table,
     OPTS_HANDLER(NuSMVEnv_get_value(env, ENV_OPTS_HANDLER));
 
   int retval, index;
-  boolean allow_adding, allow_checking, is_ctl;
+  boolean allow_adding, allow_checking, is_ctl,is_ctlg;
   Prop_ptr prop;
 
   retval = 0;
@@ -1041,6 +1049,9 @@ int prop_db_prop_create_and_add(PropDb_ptr self, SymbTable_ptr symb_table,
   allow_adding = true;
   allow_checking = true;
   is_ctl = (type == Prop_Ctl);
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  is_ctlg = (type == Prop_Ctlg);
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   prop = NULL;
 
   /* PSL properties need to be converted to CTL or LTL specifications */
@@ -1105,7 +1116,7 @@ int prop_db_prop_create_and_add(PropDb_ptr self, SymbTable_ptr symb_table,
       node_ptr context = car(core);
       node_ptr body = cdr(core);
 
-      if (Prop_Invar == type || Prop_Ltl == type) {
+      if (Prop_Invar == type || Prop_Ltl == type|| is_ctlg) {
         Compile_check_next(symb_table, body, context, true);
 
         Compile_check_input_next(symb_table, body, context);
@@ -1153,6 +1164,9 @@ int prop_db_prop_create_and_add(PropDb_ptr self, SymbTable_ptr symb_table,
 void prop_db_verify_all(const PropDb_ptr self)
 {
   PropDb_verify_all_type(self, Prop_Ctl);
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  PropDb_verify_all_type(self,Prop_Ctlg);
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   PropDb_verify_all_type(self, Prop_Compute);
   PropDb_verify_all_type(self, Prop_Ltl);
   PropDb_verify_all_type(self, Prop_Psl);
@@ -1202,6 +1216,9 @@ prop_db_prop_parse_from_arg_and_add(PropDb_ptr self,
 
   switch (type) {
   case Prop_Ctl:
+    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  case Prop_Ctlg:
+    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   case Prop_Ltl:
   case Prop_Psl:
   case Prop_Invar:
@@ -1287,6 +1304,9 @@ prop_db_get_prop_type_as_parsing_string(PropDb_ptr self, const Prop_Type type)
   switch (type) {
   case Prop_NoType: break; /* to suppress compiler's warnings */
   case Prop_Ctl: return "CTLWFF ";
+          /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    case Prop_Ctlg:  return "CTLGWFF ";
+          /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   case Prop_Ltl: return "LTLWFF ";
   case Prop_Psl: return "PSLWFF ";
   case Prop_Invar: return "NEXTWFF ";

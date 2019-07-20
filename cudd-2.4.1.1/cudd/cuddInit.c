@@ -157,6 +157,13 @@ Cudd_Init(
     maxCacheSize = (unsigned int) ((maxMemory / sizeof(DdCache)) /
                                    DD_MAX_CACHE_FRACTION);
     result = cuddInitCache(unique,cacheSize,maxCacheSize);
+
+
+    /* Graded CTL package of NuSMV: added begin */
+    GradedUtils_cacheInit();
+    /* Graded CTL package of NuSMV: added end */
+
+
     if (result == 0) return(NULL);
 
     saveHandler = MMoutOfMemory;

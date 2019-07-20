@@ -735,6 +735,7 @@ void Compile_write_coi_prop_fsm(const NuSMVEnv_ptr env,
       Set_Iterator_t iter;
 
       FlatHierarchy_set_ltlspec(coi_hierarchy, Nil);
+      FlatHierarchy_set_gradspec(coi_hierarchy, Nil);
       FlatHierarchy_set_spec(coi_hierarchy, Nil);
       FlatHierarchy_set_pslspec(coi_hierarchy, Nil);
       FlatHierarchy_set_compute(coi_hierarchy, Nil);
@@ -753,6 +754,13 @@ void Compile_write_coi_prop_fsm(const NuSMVEnv_ptr env,
               cons(nodemgr, find_node(nodemgr, LTLSPEC, prop_expr, prop_name),
                    FlatHierarchy_get_ltlspec(coi_hierarchy)));
           break;
+
+        case Prop_Ctlg:
+            FlatHierarchy_set_gradspec(
+                    coi_hierarchy,
+                    cons(nodemgr, find_node(nodemgr,CTLGSPEC , prop_expr, prop_name),
+                         FlatHierarchy_get_gradspec(coi_hierarchy)));
+                break;
         case Prop_Ctl:
           FlatHierarchy_set_spec(
               coi_hierarchy,

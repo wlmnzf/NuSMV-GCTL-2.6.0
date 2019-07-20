@@ -1173,6 +1173,20 @@ Oiter HrcNode_get_ltl_properties_iter(const HrcNode_ptr self);
 */
 void HrcNode_add_ltl_property_expr(HrcNode_ptr self, node_ptr ltl);
 
+
+
+
+void HrcNode_replace_gradspec_properties(HrcNode_ptr self, Olist_ptr psls);
+
+Oiter HrcNode_get_gradspec_properties_iter(const HrcNode_ptr self);
+
+void HrcNode_add_gradspec_property_expr(HrcNode_ptr self, node_ptr psl);
+
+
+
+
+
+
 /* PSLSPEC */
 
 /*!

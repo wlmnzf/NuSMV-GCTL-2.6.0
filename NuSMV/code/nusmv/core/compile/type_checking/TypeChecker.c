@@ -304,6 +304,11 @@ boolean TypeChecker_check_property(TypeChecker_ptr self,
     case Prop_Ltl:     kind = LTLSPEC;   break;
     case Prop_Psl:     kind = PSLSPEC;   break;
     case Prop_Invar:   kind = INVARSPEC; break;
+
+            /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+      case Prop_Ctlg:    kind = CTLGSPEC; break;
+            /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
     case Prop_Compute: kind = COMPUTE;   break;
 
     default:           error_unreachable_code();

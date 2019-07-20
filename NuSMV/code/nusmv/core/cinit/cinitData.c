@@ -604,6 +604,9 @@ void NuSMVCore_init_cmd_options(NuSMVEnv_ptr env)
   NuSMVCore_add_env_command_line_option("-is", "does not check SPEC", NULL,
                                         IGNORE_SPEC, true, false, NULL, NULL);
 
+  NuSMVCore_add_env_command_line_option("-igs", "does not check GRADEDSPEC", NULL,
+                                        IGNORE_GRADSPEC, true, false, NULL, NULL);
+
   NuSMVCore_add_env_command_line_option("-ic", "does not check COMPUTE",
                                         NULL, IGNORE_COMPUTE, true, false,
                                         NULL, NULL);

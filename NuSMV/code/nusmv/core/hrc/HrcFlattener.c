@@ -425,6 +425,14 @@ static void hrc_flattener_populate_model(HrcFlattener_ptr self,
       /* LTL */
       {HrcNode_get_ltl_properties_iter, FlatHierarchy_get_ltlspec,
        FlatHierarchy_set_ltlspec, LTLSPEC},
+
+//      HrcNode_get_gradspec_properties_iter
+       /* CTLGSPEC */
+      {HrcNode_get_gradspec_properties_iter, FlatHierarchy_get_gradspec,
+              FlatHierarchy_set_gradspec, CTLGSPEC},
+
+
+
       /* CTL */
       {HrcNode_get_ctl_properties_iter, FlatHierarchy_get_spec,
        FlatHierarchy_set_spec, SPEC},

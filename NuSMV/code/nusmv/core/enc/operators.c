@@ -314,6 +314,10 @@ node_ptr node_plus(node_ptr n1, node_ptr n2, const NuSMVEnv_ptr env)
   if (node_get_type(n2) == FAILURE) return n2; /* error in previous expr */
 
   if (node_get_type(n1) == NUMBER && node_get_type(n2) == NUMBER) {
+    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    if (NODE_TO_INT(car(n1))> (LONG_MAX - NODE_TO_INT(car(n2))) )
+      return find_node(nodemgr,NUMBER, NODE_FROM_INT(LONG_MAX), Nil);
+    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     return find_node(nodemgr, NUMBER,
              NODE_FROM_INT(NODE_TO_INT(car(n1)) + NODE_TO_INT(car(n2))), Nil);
   }
@@ -350,6 +354,11 @@ node_ptr node_times(node_ptr n1, node_ptr n2, const NuSMVEnv_ptr env)
   if (node_get_type(n2) == FAILURE) return n2; /* error in previous expr */
 
   if (node_get_type(n1) == NUMBER && node_get_type(n2) == NUMBER) {
+    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    if ((NODE_TO_INT(car(n1))>0 && NODE_TO_INT(car(n2))>0) && (NODE_TO_INT(car(n1))> LONG_MAX / NODE_TO_INT(car(n2)) ))
+      return find_node(nodemgr,NUMBER, NODE_FROM_INT(LONG_MAX), Nil);
+    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
     return find_node(nodemgr, NUMBER,
              NODE_FROM_INT(NODE_TO_INT(car(n1)) * NODE_TO_INT(car(n2))), Nil);
   }

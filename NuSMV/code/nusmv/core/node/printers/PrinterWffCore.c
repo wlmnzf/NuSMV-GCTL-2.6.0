@@ -544,7 +544,17 @@ int printer_wff_core_print_node(PrinterBase_ptr self, node_ptr n, int priority)
   case ABF: op = "ABF "; pr_tmp = 8; arity = 2; break;
   case EBG: op = "EBG "; pr_tmp = 8; arity = 2; break;
   case ABG: op = "ABG "; pr_tmp = 8; arity = 2; break;
-
+          /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+          /* Graded Operator */
+    case EGX: op = "EGX "; pr_tmp = 8; arity = 1; break;
+    case EGG: op = "EGG "; pr_tmp = 8; arity = 1; break;
+    case EGU: op = "EGU "; pr_tmp = 8; arity = 1; break;
+    case EGF: op = "EGF "; pr_tmp = 8; arity = 1; break;
+    case AGX: op = "AGX "; pr_tmp = 8; arity = 1; break;
+    case AGG: op = "AGG "; pr_tmp = 8; arity = 1; break;
+    case AGU: op = "AGU "; pr_tmp = 8; arity = 1; break;
+    case AGF: op = "AGF "; pr_tmp = 8; arity = 1; break;
+          /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   case MINU:
     if (!_PRINT("MIN")) return 0;
     op = ","; pr_tmp = 8; priority = 9; arity = 1; brckts = 1; break;
@@ -638,13 +648,74 @@ int printer_wff_core_print_node(PrinterBase_ptr self, node_ptr n, int priority)
     break;
 
   case 1:
-    if (car(n) != (node_ptr) NULL) {
-      if (!_THROW(car(n), pr_tmp)) return 0;
-      if (!_PRINT(" ")) return 0;
-      if (!_PRINT(op)) return 0;
-      if (!_PRINT(" ")) return 0;
+    switch (node_get_type(n)) {
+
+      /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+      case EGG:
+        if (!_PRINT("EG ")) return 0;
+            if (!_THROW(cdr(n), pr_tmp)) return 0; /* num */
+            if (!_PRINT(" ")) return 0;
+            if (!_THROW(car(car(n)), pr_tmp)) return 0; /* body */
+            break;
+      case EGX:
+        if (!_PRINT("EX ")) return 0;
+            if (!_THROW(cdr(n), pr_tmp)) return 0; /* num */
+            if (!_PRINT(" ")) return 0;
+            if (!_THROW(car(car(n)), pr_tmp)) return 0; /* body */
+            break;
+      case EGF:
+        if (!_PRINT("EF ")) return 0;
+            if (!_THROW(cdr(n), pr_tmp)) return 0; /* num */
+            if (!_PRINT(" ")) return 0;
+            if (!_THROW(car(car(n)), pr_tmp)) return 0; /* body */
+            break;
+      case AGG:
+        if (!_PRINT("AG ")) return 0;
+            if (!_THROW(cdr(n), pr_tmp)) return 0; /* num */
+            if (!_PRINT(" ")) return 0;
+            if (!_THROW(car(car(n)), pr_tmp)) return 0; /* body */
+            break;
+      case AGX:
+        if (!_PRINT("AX ")) return 0;
+            if (!_THROW(cdr(n), pr_tmp)) return 0; /* num */
+            if (!_PRINT(" ")) return 0;
+            if (!_THROW(car(car(n)), pr_tmp)) return 0; /* body */
+            break;
+      case AGF:
+        if (!_PRINT("AF ")) return 0;
+            if (!_THROW(cdr(n), pr_tmp)) return 0; /* num */
+            if (!_PRINT(" ")) return 0;
+            if (!_THROW(car(car(n)), pr_tmp)) return 0; /* body */
+            break;
+      case EGU:
+        if (!_PRINT("E ")) return 0;
+            if (!_THROW(cdr(n), pr_tmp)) return 0; /* num */
+            if (!_PRINT(" [ ")) return 0;
+            if (!_THROW(car(car(n)), pr_tmp)) return 0; /* left body */
+            if (!_PRINT(" U ")) return 0;
+            if (!_THROW(cdr(car(n)), pr_tmp)) return 0; /* right body */
+            if (!_PRINT("] ")) return 0;
+            break;
+      case AGU:
+        if (!_PRINT("A ")) return 0;
+            if (!_THROW(cdr(n), pr_tmp)) return 0; /* num */
+            if (!_PRINT(" [ ")) return 0;
+            if (!_THROW(car(car(n)), pr_tmp)) return 0; /* left body */
+            if (!_PRINT(" U ")) return 0;
+            if (!_THROW(cdr(car(n)), pr_tmp)) return 0; /* right body */
+            if (!_PRINT("] ")) return 0;
+            break;
+            /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+      default:
+        if (car(n) != (node_ptr) NULL) {
+          if (!_THROW(car(n), pr_tmp)) return 0;
+          if (!_PRINT(" ")) return 0;
+          if (!_PRINT(op)) return 0;
+          if (!_PRINT(" ")) return 0;
+        }
+            if (!_THROW(cdr(n), pr_tmp)) return 0;
     }
-    if (!_THROW(cdr(n), pr_tmp)) return 0;
     break;
 
   case 2:

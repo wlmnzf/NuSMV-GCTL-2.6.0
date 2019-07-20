@@ -70,6 +70,9 @@ struct FlatHierarchy
   node_ptr compassion_expr;
   node_ptr spec_expr;
   node_ptr ltlspec_expr;
+    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    node_ptr gradspec_expr;
+    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   node_ptr invarspec_expr;
   node_ptr pslspec_expr;
   node_ptr compute_expr;
@@ -385,6 +388,25 @@ void FlatHierarchy_set_spec(FlatHierarchy_ptr self, node_ptr n)
   FLAT_HIERARCHY_CHECK_INSTANCE(self);
   self->spec_expr = n;
 }
+
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+node_ptr FlatHierarchy_get_gradspec(FlatHierarchy_ptr self)
+{
+  FLAT_HIERARCHY_CHECK_INSTANCE(self);
+  return(self->gradspec_expr);
+}
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void FlatHierarchy_set_gradspec(FlatHierarchy_ptr self, node_ptr n)
+{
+  FLAT_HIERARCHY_CHECK_INSTANCE(self);
+  self->gradspec_expr = n;
+}
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+
 
 node_ptr FlatHierarchy_get_ltlspec(FlatHierarchy_ptr self)
 {

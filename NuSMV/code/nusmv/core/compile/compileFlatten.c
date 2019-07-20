@@ -687,6 +687,11 @@ void Compile_ProcessHierarchy(const NuSMVEnv_ptr env,
   tmp = reverse(FlatHierarchy_get_ltlspec(hierarchy));
   FlatHierarchy_set_ltlspec(hierarchy, tmp/*compile_fix_nested_context(tmp)*/);
 
+  /****************************************************/
+  tmp = reverse(FlatHierarchy_get_gradspec(hierarchy));
+  FlatHierarchy_set_gradspec(hierarchy, tmp);
+  /***************************************************/
+
   tmp = reverse(FlatHierarchy_get_invarspec(hierarchy));
   FlatHierarchy_set_invarspec(hierarchy,
                               tmp/*compile_fix_nested_context(tmp)*/);
@@ -747,6 +752,8 @@ void Compile_ProcessHierarchy(const NuSMVEnv_ptr env,
                        true);
     Compile_check_next(symb_table, FlatHierarchy_get_ltlspec(hierarchy), Nil,
                        true);
+    Compile_check_next(symb_table, FlatHierarchy_get_gradspec(hierarchy), Nil,
+                         true);
     Compile_check_next(symb_table, FlatHierarchy_get_pslspec(hierarchy), Nil,
                        false);
 
@@ -1001,6 +1008,9 @@ int CompileFlatten_flatten_smv(NuSMVEnv_ptr env, boolean calc_vars_constrains,
                           FlatHierarchy_get_spec(hierarchy),
                           FlatHierarchy_get_compute(hierarchy),
                           FlatHierarchy_get_ltlspec(hierarchy),
+            /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+                          FlatHierarchy_get_gradspec(hierarchy),
+            /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
                           FlatHierarchy_get_pslspec(hierarchy),
                           FlatHierarchy_get_invarspec(hierarchy));
     }
@@ -2937,6 +2947,48 @@ static void compile_instantiate(const NuSMVEnv_ptr env,
       }
       break;
 
+
+
+
+     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    case CTLGSPEC:
+    {
+        node_ptr property_name = cdr(cur_decl);
+
+        if (node_get_type(car(cur_decl)) == CONTEXT) {
+            /* concatenates local context to the current module */
+            node_ptr new_ctx = CompileFlatten_concat_contexts(env, mod_name,
+                                                              caar(cur_decl));
+            tmp = find_node(nodemgr, CONTEXT, new_ctx, cdr(car(cur_decl)));
+        }
+        else tmp = find_node(nodemgr, CONTEXT, mod_name, car(cur_decl));
+
+        /* Support for property names */
+        if (Nil != property_name) {
+            property_name = CompileFlatten_concat_contexts(env, mod_name,
+                                                           property_name);
+            if (!FlatHierarchy_add_property_name(result, property_name)){
+                ErrorMgr_error_redefining(errmgr, property_name);
+            }
+        }
+        tmp = find_node(nodemgr, CTLGSPEC, tmp, property_name);
+
+        tmp = cons(nodemgr, tmp, FlatHierarchy_get_gradspec(result));
+        FlatHierarchy_set_gradspec(result, tmp);
+
+        if (HRC_NODE(NULL) != hrc_result)
+            HrcNode_add_gradspec_property_expr(hrc_result, cur_decl);
+    }
+            break;
+//        tmp = cons(nodemgr, find_node(nodemgr,CONTEXT, mod_name, car(cur_decl)),
+//                   FlatHierarchy_get_gradspec(result));
+//            FlatHierarchy_set_gradspec(result, tmp);
+//            break;
+     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+
+
+
     case PSLSPEC:
       {
         node_ptr property_name = cdr(cur_decl);
@@ -3549,6 +3601,29 @@ static node_ptr compile_flatten_eval_number(const MasterCompileFlattener_ptr fla
                              cdr(n));
       break;
     }
+
+          /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+          /* CTL graded Temporal Operators */
+//    case EGX:
+//    case EGG:
+//    case EGU:
+//    case EGF:
+//    case AGX:
+//    case AGG:
+//    case AGU:
+//    case AGF:
+//    {
+//
+//      node_ptr left  = compileFlattenSexpRecur(symb_table, car(sexp), context);
+//      node_ptr right = compileFlattenSexpRecur(symb_table, cdr(sexp), context);
+//
+//      result = new_node(node_get_type(sexp), left, right);
+//      //     node_ptr body  = compileFlattenSexpRecur(symb_table, car(sexp), context);
+//      //      result = new_node(node_get_type(sexp), body, cdr(sexp));
+//
+//      break;
+//    }
+          /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
   default:
     {

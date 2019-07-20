@@ -87,6 +87,11 @@ typedef struct HrcNode_TAG
   Olist_ptr constants;         /* CONSTANTS */
   Olist_ptr invar_props;       /* INVARSPEC */
   Olist_ptr ctl_props;         /* CTLSPEC */
+
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+   Olist_ptr gradspec_props;
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
   Olist_ptr ltl_props;         /* LTLSPEC */
   Olist_ptr psl_props;         /* PSLSPEC */
   Olist_ptr compute_props;     /* COMPUTE */

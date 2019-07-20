@@ -13,6 +13,7 @@
 "INVAR"                 {nusmv_yylval.lineno = nusmv_yylineno; return(TOK_INVAR);}
 "SPEC"                  {nusmv_yylval.lineno = nusmv_yylineno; return(TOK_SPEC);}
 "CTLSPEC"               {nusmv_yylval.lineno = nusmv_yylineno; return(TOK_CTLSPEC);}
+"CTLGRADSPEC"           {nusmv_yylval.lineno = nusmv_yylineno; return(TOK_CTLGSPEC);}
 "LTLSPEC"               {nusmv_yylval.lineno = nusmv_yylineno; return(TOK_LTLSPEC);}
 "PSLSPEC"               {nusmv_yylval.lineno = nusmv_yylineno; Parser_switch_to_psl(); return(TOK_PSLSPEC);}
 "COMPUTE"               {nusmv_yylval.lineno = nusmv_yylineno; return(TOK_COMPUTE);}
@@ -24,6 +25,7 @@
 "SIMPWFF"               {nusmv_yylval.lineno = nusmv_yylineno; return(TOK_SIMPWFF);}
 "NEXTWFF"               {nusmv_yylval.lineno = nusmv_yylineno; return(TOK_NEXTWFF);}
 "CTLWFF"                {nusmv_yylval.lineno = nusmv_yylineno; return(TOK_CTLWFF);}
+"CTLGWFF"               {nusmv_yylval.lineno = nusmv_yylineno; return(TOK_CTLGWFF);}
 "LTLWFF"                {nusmv_yylval.lineno = nusmv_yylineno; return(TOK_LTLWFF);}
 "COMPWFF"               {nusmv_yylval.lineno = nusmv_yylineno; return(TOK_COMPWFF);}
 "COMPID"                {nusmv_yylval.lineno = nusmv_yylineno; return(TOK_COMPID);}

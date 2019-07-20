@@ -486,6 +486,55 @@ static SymbType_ptr checker_core_check_expr(CheckerBase_ptr self,
       return _SET_TYPE(ctx_expr, type);
     }
 
+          /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    case EGX:
+    case EGG:
+    case EGU:
+    case EGF:
+    case AGX:
+    case AGG:
+    case AGU:
+    case AGF:
+    {
+      /* get the operand's type */
+      SymbType_ptr type = _THROW(car(expr), context);
+
+      if (SymbType_is_error(type)) { /* earlier error */
+        return _SET_TYPE(ctx_expr, type);
+      }
+
+      /* the operand must be boolean (or Word for NOT) */
+//      if (SymbType_is_boolean_enum(type) ||
+//          (node_get_type(expr) == NOT &&
+//           SymbType_get_tag(type) == SYMB_TYPE_WORD)) {
+//        return _SET_TYPE(ctx_expr, type);
+//      }
+
+      /* the operand must be boolean (or Word for NOT) */
+      if (SymbType_is_boolean(type) ||
+          (node_get_type(expr) == NOT &&
+           SymbType_is_word(type))) {
+        return _SET_TYPE(ctx_expr, type);
+      }
+
+
+      /* is this a type error ? */
+      if (_VIOLATION(SymbType_is_back_comp(type) ?
+                     TC_VIOLATION_TYPE_BACK_COMP : TC_VIOLATION_TYPE_MANDATORY,
+                     ctx_expr)) {
+        return _SET_TYPE(ctx_expr, SymbTablePkg_error_type(env));
+      }
+      /* this is not an error after all -> keep the type what ever it is */
+      return _SET_TYPE(ctx_expr, type);
+    }
+          /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+
+
+
+
+
+
 
     /* casts: boolean -> Word[1] and Word[1] -> boolean. */
   case CAST_BOOL:

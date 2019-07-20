@@ -339,6 +339,14 @@ void FlatHierarchy_set_compassion(FlatHierarchy_ptr cmp,
 boolean FlatHierarchy_add_property_name(FlatHierarchy_ptr cmp,
                                             node_ptr name);
 
+
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+node_ptr FlatHierarchy_get_gradspec(FlatHierarchy_ptr cmp);
+void FlatHierarchy_set_gradspec(FlatHierarchy_ptr cmp, node_ptr n);
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+
 /*!
   \brief \todo Missing synopsis
 

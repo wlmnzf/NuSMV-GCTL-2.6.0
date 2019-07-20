@@ -505,7 +505,7 @@ PropDb_PrintFmt PropDb_get_print_fmt(const PropDb_ptr self);
 */
 int
 PropDb_fill(PropDb_ptr self, SymbTable_ptr symb_table,
-            node_ptr, node_ptr, node_ptr,
+            node_ptr, node_ptr, node_ptr, node_ptr,
             node_ptr, node_ptr);
 
 /*!

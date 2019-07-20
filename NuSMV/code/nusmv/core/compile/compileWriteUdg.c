@@ -2014,6 +2014,10 @@ static void compile_write_udg_bool_specs(const NuSMVEnv_ptr env,
   /* dumps the properties */
   compile_write_udg_bool_spec(env, out, enc,
                               FlatHierarchy_get_spec(hierarchy),
+                              "CTLGSPEC\n", det_layer,
+                              dag_info, defines);
+  compile_write_udg_bool_spec(env, out, enc,
+                              FlatHierarchy_get_spec(hierarchy),
                               "CTLSPEC\n", det_layer,
                               dag_info, defines);
   compile_write_udg_bool_spec(env, out, enc,

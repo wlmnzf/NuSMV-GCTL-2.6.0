@@ -20,6 +20,7 @@
 #include "nusmv/core/prop/PropDb.h"
 #include "nusmv/core/utils/ErrorMgr.h"
 #include "nusmv/core/utils/ucmd.h"
+#include "nusmv/core/graded/mc/GradedCtl.h"
 
 /*---------------------------------------------------------------------------*/
 /* Constant declarations                                                     */

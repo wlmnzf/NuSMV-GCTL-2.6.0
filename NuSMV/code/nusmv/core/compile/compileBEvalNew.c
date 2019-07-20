@@ -1860,6 +1860,18 @@ static node_ptr expr2bexpr_recur(BddEnc_ptr enc,
     case OP_GLOBAL:
     case OP_HISTORICAL:
 
+      /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+      /* GRADED TEMPORAL OPERATORS (cdr is a number, no recursion needed) */
+    case EGG:
+    case EGX:
+    case EGU:
+    case EGF:
+    case AGX:
+    case AGG:
+    case AGU:
+    case AGF:
+      /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
     case EBF: /* BOUNDED TEMPORAL OPERATORS (cdr is range, no recursion needed) */
     case ABF:
     case EBG:

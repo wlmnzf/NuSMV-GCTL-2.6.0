@@ -3112,6 +3112,8 @@ static void compile_write_flat_specs(const NuSMVEnv_ptr env,
   /* dumps the properties */
   compile_write_flat_spec(env, cwd, FlatHierarchy_get_spec(cwd->hierarchy),
                           "CTLSPEC\n");
+  compile_write_flat_spec(env, cwd, FlatHierarchy_get_spec(cwd->hierarchy),
+                          "CTLGSPEC\n");
   compile_write_flat_spec(env, cwd, FlatHierarchy_get_compute(cwd->hierarchy),
                           "COMPUTE\n");
   compile_write_flat_spec(env, cwd, FlatHierarchy_get_ltlspec(cwd->hierarchy),
@@ -3393,6 +3395,8 @@ static void compile_write_bool_specs(const NuSMVEnv_ptr env,
                           "COMPUTE\n");
   compile_write_bool_spec(env, cwd, FlatHierarchy_get_ltlspec(cwd->hierarchy),
                           "LTLSPEC\n");
+  compile_write_bool_spec(env, cwd, FlatHierarchy_get_ltlspec(cwd->hierarchy),
+                          "CTLGSPEC\n");
   compile_write_bool_spec(env, cwd, FlatHierarchy_get_invarspec(cwd->hierarchy),
                           "INVARSPEC\n");
 

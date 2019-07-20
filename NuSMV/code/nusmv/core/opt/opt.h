@@ -427,6 +427,14 @@ typedef enum {
 */
 #define SHOWN_STATES      "shown_states"
 
+
+
+
+
+#define IGNORE_GRADSPEC       "ignore_gradspec"
+
+
+
 /*!
   \brief \todo Missing synopsis
 
@@ -1290,6 +1298,15 @@ void    set_shown_states_level(OptsHandler_ptr, int);
   \todo Missing description
 */
 int     opt_shown_states_level(OptsHandler_ptr);
+
+
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+void    set_ignore_gradspec(OptsHandler_ptr);
+void    unset_ignore_gradspec(OptsHandler_ptr);
+boolean opt_ignore_gradspec(OptsHandler_ptr);
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
 
 /*!
   \brief \todo Missing synopsis

@@ -400,6 +400,129 @@ basic_expr :
              implies_expr
            ;
 
+
+
+/***********************************************/
+setg_expr    : subrange
+	     | primg_expr
+             | TOK_LCB setg_list_expr TOK_RCB   { $$ = $2; }
+             ;
+
+setg_list_expr : ctlg_basic_expr
+               | setg_list_expr TOK_COMMA ctlg_basic_expr {$$ = new_lined_node(NODEMGR,UNION, $1, $3, $2);}
+               ;
+
+
+uniong_expr  : setg_expr
+             | uniong_expr TOK_UNION setg_expr { $$ = new_lined_node(NODEMGR,UNION, $1, $3, $2); }
+             ;
+
+ing_expr :   uniong_expr
+             | ing_expr TOK_SETIN uniong_expr { $$ = new_lined_node(NODEMGR,SETIN, $1, $3, $2); }
+             ;
+
+primg_expr :
+               constant
+             | TOK_MINUS primg_expr { $$ = new_lined_node(NODEMGR,UMINUS, $2, Nil, $1); }
+             | TOK_ATOM
+	     | TOK_LP ctlg_basic_expr TOK_RP             { $$ = $2; }
+             | TOK_NOT primg_expr   { $$ = new_lined_node(NODEMGR,NOT, $2, Nil, $1); }
+	     | primg_expr TOK_DOT TOK_ATOM
+                    {
+		      if (ATOM != node_get_type($1) && DOT != node_get_type($1) && ARRAY != node_get_type($1) && SELF != node_get_type($1)) {
+			nusmv_yyerror_lined("incorrect DOT expression", $2);
+		        YYABORT;
+		      }
+		      $$ = new_lined_node(NODEMGR,DOT, $1, $3, $2) ;
+		    }
+	      | primg_expr TOK_DOT TOK_NUMBER
+		    {
+			    if (ATOM != node_get_type($1) && DOT != node_get_type($1) && ARRAY != node_get_type($1) && SELF != node_get_type($1)) {
+			    nusmv_yyerror_lined("incorrect DOT expression", $2);
+		    YYABORT;
+		      }
+		      $$ = new_lined_node(NODEMGR,DOT, $1, $3, $2) ;
+		    }
+             | primg_expr TOK_LB ctlg_basic_expr TOK_RB
+                     {
+		       if (ATOM != node_get_type($1) && DOT != node_get_type($1) && ARRAY != node_get_type($1) && SELF != node_get_type($1)) {
+			nusmv_yyerror_lined("incorrect ARRAY expression", $2);
+			YYABORT;
+		       }
+		       $$ = new_lined_node(NODEMGR,ARRAY, $1, $3, $2);
+		     }
+             | primg_expr TOK_LB ctlg_basic_expr TOK_COLON ctlg_basic_expr TOK_RB
+                       {
+			$$ = new_lined_node(NODEMGR,BIT_SELECTION, $1,
+			               new_lined_node(NODEMGR,COLON, $3, $5, $4), $2);
+		       }
+             ;
+
+relationalg_expr
+	     :ing_expr
+             //| primg_expr
+	     /*| TOK_LP relationalg_expr TOK_RP { $$ = $2; }*/
+	     | relationalg_expr TOK_EQUAL primg_expr { $$ = new_lined_node(NODEMGR,EQUAL, $1, $3, $2); }
+             | relationalg_expr TOK_NOTEQUAL primg_expr { $$ = new_lined_node(NODEMGR,NOTEQUAL, $1, $3, $2); }
+             | relationalg_expr TOK_LT primg_expr { $$ = new_lined_node(NODEMGR,LT, $1, $3, $2); }
+             | relationalg_expr TOK_GT primg_expr { $$ = new_lined_node(NODEMGR,GT, $1, $3, $2); }
+             | relationalg_expr TOK_LE primg_expr { $$ = new_lined_node(NODEMGR,LE, $1, $3, $2); }
+             | relationalg_expr TOK_GE primg_expr { $$ = new_lined_node(NODEMGR,GE, $1, $3, $2); }
+             ;
+
+ctlg_expr     : relationalg_expr
+              | TOK_LP ctlg_expr TOK_RP { $$ = $2; }
+              | pure_ctlg_expr /* all CTL operators */
+              ;
+
+pure_ctlg_expr
+             : TOK_EX ctlg_basic_expr       { $$ = new_lined_node(NODEMGR,EGX, new_lined_node(NODEMGR,EX, $2, Nil, $1),
+							    new_node(NODEMGR,NUMBER, NODE_FROM_INT(0), Nil), $1);}
+	     | TOK_EX number ctlg_basic_expr       { $$ = new_lined_node(NODEMGR,EGX, new_lined_node(NODEMGR,EX, $3, Nil, $1), $2, $1);}
+	     | TOK_AX ctlg_basic_expr       { $$ = new_lined_node(NODEMGR,AGX, new_lined_node(NODEMGR,AX, $2, Nil, $1),
+							    new_node(NODEMGR,NUMBER, NODE_FROM_INT(0), Nil), $1);}
+	     | TOK_AX number ctlg_basic_expr       { $$ = new_lined_node(NODEMGR,AGX, new_lined_node(NODEMGR,AX, $3, Nil, $1), $2, $1);}
+	     | TOK_AG ctlg_basic_expr       { $$ = new_lined_node(NODEMGR,AGG, new_lined_node(NODEMGR,AG, $2, Nil, $1),
+							    new_node(NODEMGR,NUMBER, NODE_FROM_INT(0), Nil), $1);}
+             | TOK_AG number ctlg_basic_expr       { $$ = new_lined_node(NODEMGR,AGG, new_lined_node(NODEMGR,AG, $3, Nil, $1), $2, $1);}
+	     | TOK_EF ctlg_basic_expr       { $$ = new_lined_node(NODEMGR,EGF, new_lined_node(NODEMGR,EF, $2, Nil, $1),
+							    new_node(NODEMGR,NUMBER, NODE_FROM_INT(0), Nil), $1);}
+             | TOK_EF number ctlg_basic_expr       { $$ = new_lined_node(NODEMGR,EGF, new_lined_node(NODEMGR,EF, $3, Nil, $1), $2, $1);}
+	     | TOK_AF ctlg_basic_expr       { $$ = new_lined_node(NODEMGR,AGF, new_lined_node(NODEMGR,AF, $2, Nil, $1),
+							    new_node(NODEMGR,NUMBER, NODE_FROM_INT(0), Nil), $1);}
+             | TOK_AF number ctlg_basic_expr       { $$ = new_lined_node(NODEMGR,AGF, new_lined_node(NODEMGR,AF, $3, Nil, $1), $2, $1);}
+
+             | TOK_AA TOK_LB ctlg_basic_expr TOK_UNTIL ctlg_basic_expr TOK_RB
+                                     { $$ = new_lined_node(NODEMGR,AGU, new_lined_node(NODEMGR,AU, $3, $5, $1),
+							   new_node(NODEMGR,NUMBER, NODE_FROM_INT(0), Nil), $1);}
+             | TOK_AA number TOK_LB ctlg_basic_expr TOK_UNTIL ctlg_basic_expr TOK_RB
+                                     { $$ = new_lined_node(NODEMGR,AGU, new_lined_node(NODEMGR,AU, $4, $6, $1), $2, $1);}
+	     | TOK_EG ctlg_basic_expr       { $$ = new_lined_node(NODEMGR,EGG, new_lined_node(NODEMGR,EG, $2, Nil, $1),
+							    new_node(NODEMGR,NUMBER, NODE_FROM_INT(0), Nil), $1);}
+             | TOK_EG number ctlg_basic_expr       { $$ = new_lined_node(NODEMGR,EGG, new_lined_node(NODEMGR,EG, $3, Nil, $1), $2, $1);}
+             | TOK_EE TOK_LB ctlg_basic_expr TOK_UNTIL ctlg_basic_expr TOK_RB
+                                     { $$ = new_lined_node(NODEMGR,EGU, new_lined_node(NODEMGR,EU, $3, $5, $1),
+							   new_node(NODEMGR,NUMBER, NODE_FROM_INT(0), Nil), $1);}
+             | TOK_EE number TOK_LB ctlg_basic_expr TOK_UNTIL ctlg_basic_expr TOK_RB
+                                     { $$ = new_lined_node(NODEMGR,EGU, new_lined_node(NODEMGR,EU, $4, $6, $1), $2, $1);}
+
+             /* NOT is required here to allow such expr as "! EX a" */
+             | TOK_NOT pure_ctlg_expr { $$ = new_lined_node(NODEMGR,NOT, $2, Nil, $1); }
+             ;
+ctlg_basic_expr :
+                  ctlg_expr
+                | ctlg_basic_expr TOK_IMPLIES ctlg_basic_expr { $$ = new_lined_node(NODEMGR,IMPLIES, $1, $3, $2); }
+	        | ctlg_basic_expr TOK_IFF ctlg_basic_expr   { $$ = new_lined_node(NODEMGR,IFF, $1, $3, $2); }
+                | ctlg_basic_expr TOK_OR ctlg_basic_expr    { $$ = new_lined_node(NODEMGR,OR,$1, $3, $2); }
+                | ctlg_basic_expr TOK_XOR ctlg_basic_expr   { $$ = new_lined_node(NODEMGR,XOR,$1, $3, $2); }
+                | ctlg_basic_expr TOK_XNOR ctlg_basic_expr  { $$ = new_lined_node(NODEMGR,XNOR,$1, $3, $2); }
+	        | ctlg_basic_expr TOK_AND ctlg_basic_expr  { $$ = new_lined_node(NODEMGR,AND, $1, $3, $2); }
+		;
+
+/****************************/
+
+
+
 /* every expression below, at first, remembers the current kind of
    the parsed expression and then sets its own kind.
    After parsing the kind of expression is restoreed
@@ -537,6 +660,7 @@ declaration  : isa
              | invarspec
              | ctlspec
              | ltlspec
+             | ctlgspec
              | pslspec
              | compute
              | constants
@@ -735,6 +859,11 @@ pslspec       : TOK_PSLSPEC
 }
               ;
 
+/****************************/
+ctlgspec      : TOK_CTLGSPEC ctlg_basic_expr optsemi {$$ = new_lined_node(NODEMGR,CTLGSPEC, $2, Nil, $1);}
+              ;
+
+
 constants     : TOK_CONSTANTS constants_expression TOK_SEMI
                   {$$ = new_lined_node(NODEMGR, CONSTANTS, $2, Nil, $1);}
               ;
@@ -800,6 +929,16 @@ command_case  : TOK_INIT simple_expression TOK_SEMI
               {$$ = new_lined_node(NODEMGR, CONSTRAINT, $2, Nil, $1);}
               | TOK_ITYPE itype TOK_SEMI
                  {$$ = new_lined_node(NODEMGR, ITYPE, $2, Nil, $1);}
+
+
+              | TOK_CTLGWFF ctlg_basic_expr TOK_SEMI
+                                  {$$ = new_lined_node(NODEMGR,CTLGWFF,
+                                              new_node(NODEMGR,CONTEXT, Nil, $2), Nil, $1);
+                                  }
+              | TOK_CTLGWFF ctlg_basic_expr TOK_INCONTEXT context TOK_SEMI
+                 		 {$$ = new_lined_node(NODEMGR,CTLGWFF,
+                 		            new_node(NODEMGR,CONTEXT, context2maincontext($4), $2), Nil, $1);
+                                  }
 
 /* properties */
               | TOK_SIMPWFF _simpwff {$$ = new_lined_node(NODEMGR, SIMPWFF, node2maincontext($2), Nil, $1);}

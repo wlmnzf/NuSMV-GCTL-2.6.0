@@ -301,6 +301,11 @@ int CommandProcessModel(NuSMVEnv_ptr env, int argc, char** argv)
   if (! opt_ignore_ltlspec(opts))
     if (Cmd_CommandExecute(env, "check_ltlspec")) goto CommandProcessModel_exit_1;
 
+  /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  if (! opt_ignore_gradspec(opts))
+    if (Cmd_CommandExecute(env,"check_gctlspec")) goto CommandProcessModel_exit_1;
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
   if (! opt_ignore_pslspec(opts))
     if (Cmd_CommandExecute(env, "check_pslspec")) goto CommandProcessModel_exit_1;
 
