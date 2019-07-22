@@ -1219,11 +1219,40 @@ extern int cuddComputeFloorLog2 (unsigned int value);
 extern int GradedUtils_cacheInit();
 extern void GradedUtils_cacheFlush();
 extern void GradedUtils_cacheFreeDeadNodes();
-//extern void GradedUtils_cacheInsert4(unsigned int, DdNode *, DdNode *, DdNode *, DdNode *, DdNode *);
-//extern void GradedUtils_cacheInsert3(unsigned int, DdNode *, DdNode *, DdNode *, DdNode *);
-//extern DdNode * GradedUtils_cacheLookup4(DdManager *, unsigned int, DdNode *, DdNode *, DdNode *, DdNode *);
-//extern DdNode * GradedUtils_cacheLookup3(DdManager *, unsigned int, DdNode *, DdNode *, DdNode *);
-
+//void GradedUtils_cacheInsert4(unsigned int, DdNode *, DdNode *, DdNode *, DdNode *, DdNode *);
+void
+GradedUtils_cacheInsert4(
+        ptruint op,
+        DdNode * f,
+        DdNode * g,
+        DdNode * h,
+        DdNode * i,
+        DdNode * data);
+//void GradedUtils_cacheInsert3(unsigned int, DdNode *, DdNode *, DdNode *, DdNode *);
+void
+GradedUtils_cacheInsert3(
+        ptruint op,
+        DdNode * f,
+        DdNode * g,
+        DdNode * h,
+        DdNode * data);
+//DdNode * GradedUtils_cacheLookup4(DdManager *, unsigned int, DdNode *, DdNode *, DdNode *, DdNode *);
+DdNode *
+GradedUtils_cacheLookup4(
+        DdManager * dd,
+        ptruint op,
+        DdNode * f,
+        DdNode * g,
+        DdNode * h,
+        DdNode * i);
+//DdNode * GradedUtils_cacheLookup3(DdManager *, unsigned int, DdNode *, DdNode *, DdNode *);
+DdNode *
+GradedUtils_cacheLookup3(
+        DdManager * dd,
+        ptruint op,
+        DdNode * f,
+        DdNode * g,
+        DdNode * h);
 /* Graded CTL package of NuSMV: added end */
 
 

@@ -1569,6 +1569,7 @@ short int PropType_to_node_type(const Prop_Type type)
 
   switch (type) {
   case Prop_Ctl:     res = SPEC; break;
+  case Prop_Ctlg:    res=CTLGSPEC;break;
   case Prop_Ltl:     res = LTLSPEC; break;
   case Prop_Psl:     res = PSLSPEC; break;
   case Prop_Invar:   res = INVARSPEC; break;

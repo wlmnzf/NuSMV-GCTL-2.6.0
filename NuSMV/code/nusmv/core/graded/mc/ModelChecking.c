@@ -56,7 +56,9 @@ void GradedMc_checkGradedCtlSpec(NuSMVEnv_ptr env,Prop_ptr prop) {
 	DDMgr_ptr dd;
 	Expr_ptr spec = Prop_get_expr_core(prop);
 	StreamMgr_ptr streams;
-	int nTracce = 1;
+    treeNode_ptr albero;
+    int j;
+    int nTracce = 1;
 	cycleInf_ptr cicli;
 	const ErrorMgr_ptr errmgr =
 			ERROR_MGR(NuSMVEnv_get_value(env, ENV_ERROR_MANAGER));
@@ -155,13 +157,13 @@ void GradedMc_checkGradedCtlSpec(NuSMVEnv_ptr env,Prop_ptr prop) {
 		printf("mau dopo\n");*/
 		
 		 nTracce = 1;
-		treeNode_ptr albero = GradedMc_explainGraded(fsm, enc, tmp1, spec, Nil);
+		 albero = GradedMc_explainGraded(fsm, enc, tmp1, spec, Nil);
 		
 		
 		GradedUtils_countTraces(fsm, enc, albero, &nTracce);
 		
 		 cicli = ALLOC(cycleInf, nTracce);
-		int j;
+
 		for(j=0; j<nTracce; j++){
 		  cicli[j].nStato = 0;
 		}

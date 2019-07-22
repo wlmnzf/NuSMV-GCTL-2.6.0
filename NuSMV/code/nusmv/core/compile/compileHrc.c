@@ -227,6 +227,16 @@ void Compile_fill_hrc_from_mod_body(const NuSMVEnv_ptr env,
       break;
     }
 
+      case CTLGSPEC: {
+        node_ptr decl_iter;
+        for (decl_iter = car(cur_decl);
+             decl_iter != Nil;
+             decl_iter = cdr(decl_iter)) {
+          HrcNode_add_gradspec_property_expr(hrc_result, car(decl_iter));
+        }
+        break;
+      }
+
     case LTLSPEC: {
       node_ptr decl_iter;
       for (decl_iter = car(cur_decl);

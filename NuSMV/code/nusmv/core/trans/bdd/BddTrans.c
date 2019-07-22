@@ -559,6 +559,38 @@ bdd_trans_debug_partitioned(const ClusterBasedTrans_ptr self,
 
 ***************************************************************************/
 
+/*********************************************/
+ClusterList_ptr BddTrans_get_backward(const BddTrans_ptr self)
+{
+    ClusterBasedTrans_ptr trans;
+    BDD_TRANS_CHECK_INSTANCE(self);
+   trans = (ClusterBasedTrans_ptr) self->transition;
+  return trans->backward_trans;
+}
+
+
+/**Function********************************************************************
+
+  Synopsis           [Returns forward transition relation.]
+
+  Description        [self keeps the ownership of the returned instance.]
+
+  SideEffects        []
+
+  SeeAlso            []
+
+******************************************************************************/
+ClusterList_ptr BddTrans_get_forward(const BddTrans_ptr self)
+{
+    ClusterBasedTrans_ptr trans;
+    BDD_TRANS_CHECK_INSTANCE(self);
+   trans = (ClusterBasedTrans_ptr) self->transition;
+  return trans->forward_trans;
+}
+
+/*********************************************/
+
+
 /*!
   \brief Implementation of 'copy' parameter of
   BddTrans_generic_create having 'transition' of type ClusterBasedTrans_ptr

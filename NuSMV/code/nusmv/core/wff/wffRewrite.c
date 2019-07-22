@@ -169,6 +169,7 @@ Pair_ptr Wff_Rewrite_rewrite_formula_generic(const NuSMVEnv_ptr env,
   switch(spec_type) {
   case SPEC: break;
   case LTLSPEC: break;
+  case CTLGSPEC:break;
   case INVARSPEC: break;
   case PSLSPEC: break;
   case COMPUTE: break;

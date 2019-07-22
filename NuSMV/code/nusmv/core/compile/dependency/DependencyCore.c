@@ -319,6 +319,16 @@ dependency_core_get_dependencies(DependencyBase_ptr self,
   case ABG:
   case EBU:    /* CTL binary bounded Temporal Operators */
   case ABU:
+    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+      case EGX:
+      case EGG:
+      case EGU:
+      case EGF:
+      case AGX:
+      case AGG:
+      case AGU:
+      case AGF:
+          /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   case OP_NEXT:    /* LTL unary Temporal Operators */
   case OP_PREC:
   case OP_NOTPRECNOT:

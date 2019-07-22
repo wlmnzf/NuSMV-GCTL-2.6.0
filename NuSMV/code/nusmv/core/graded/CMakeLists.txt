@@ -6,7 +6,7 @@ mc/GradedCtl.c
 mc/ModelChecking.c
 
 utils/GradedUtils.c
-utils/GradedUtils
+utils/TreeUtils.c
 
 )
 

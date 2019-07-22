@@ -318,6 +318,9 @@ BddTrans_get_k_backward_image_state_input(const BddTrans_ptr self,
 void BddTrans_print_short_info(const BddTrans_ptr self,
                                       FILE* file);
 
-
+/*********************************************/
+ClusterList_ptr BddTrans_get_backward(const BddTrans_ptr self);
+ClusterList_ptr BddTrans_get_forward(const BddTrans_ptr self);
+/*********************************************/
 
 #endif /* __NUSMV_CORE_TRANS_BDD_BDD_TRANS_H__ */

@@ -539,6 +539,7 @@ static void print_operator(FILE* output_stream, node_ptr expr)
   case COMPASSION:   fprintf(output_stream,"COMPASSION"); return;
   case SPEC:      fprintf(output_stream,"SPEC"); return;
   case LTLSPEC:   fprintf(output_stream,"LTLSPEC"); return;
+  case CTLGSPEC:   fprintf(output_stream,"CTLGSPEC"); return;
   case PSLSPEC:   fprintf(output_stream,"PSLSPEC"); return;
   case INVARSPEC: fprintf(output_stream,"INVARSPEC"); return;
   case COMPUTE:   fprintf(output_stream,"COMPUTE"); return;

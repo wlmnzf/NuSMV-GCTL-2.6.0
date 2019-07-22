@@ -51,4 +51,7 @@ BddStates GradedMc_ag (BddFsm_ptr, BddStates, int);
 
 BddStates GradedMc_af (BddFsm_ptr, BddStates, int);
 
+BddStates GradedMc_iff(BddFsm_ptr fsm, BddStates f, BddStates g);
+
+
 #endif /* __MC_H__ */

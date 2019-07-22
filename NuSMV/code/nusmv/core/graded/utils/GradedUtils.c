@@ -1,14 +1,18 @@
+#include <nusmv/core/dd/DDMgr_private.h>
+#include <nusmv/core/utils/StreamMgr.h>
+#include <nusmv/core/mc/mc.h>
 #include "GradedUtils.h"
+#include "../../../../../../cudd-2.4.1.1/cudd/cuddInt.h"
 
 /******************************************************************************
     Utilities for bdd and add
 ******************************************************************************/
 
-node_ptr GradedUtils_nodePlus(node_ptr n1, node_ptr n2, node_ptr k)
+node_ptr GradedUtils_nodePlus(NuSMVEnv_ptr env,node_ptr n1, node_ptr n2, node_ptr k)
 { 
     nusmv_ptrint n1_int, n2_int, k_int;
-	BddEnc_ptr enc = BddFsm_get_bdd_encoding(fsm);
-	const NuSMVEnv_ptr env = EnvObject_get_environment(ENV_OBJECT(enc));
+//	BddEnc_ptr enc = BddFsm_get_bdd_encoding(fsm);
+//	const NuSMVEnv_ptr env = EnvObject_get_environment(ENV_OBJECT(enc));
 	const NodeMgr_ptr nodemgr =
 			NODE_MGR(NuSMVEnv_get_value(env, ENV_NODE_MGR));
 	const ExprMgr_ptr exprs = EXPR_MGR(NuSMVEnv_get_value(env, ENV_EXPR_MANAGER));
@@ -22,16 +26,18 @@ node_ptr GradedUtils_nodePlus(node_ptr n1, node_ptr n2, node_ptr k)
     k_int = NODE_TO_INT(car(k));
     
     if (n1_int > (k_int - n2_int))
-	    return find_node(NUMBER, NODE_FROM_INT(k_int), Nil);
+	    return find_node(nodemgr,NUMBER, NODE_FROM_INT(k_int), Nil);
 
-    return find_node(NUMBER, NODE_FROM_INT(n1_int + n2_int), Nil);
+    return find_node(nodemgr,NUMBER, NODE_FROM_INT(n1_int + n2_int), Nil);
 
 }
 
-node_ptr GradedUtils_nodeTimes(node_ptr n1, node_ptr n2, node_ptr k)
+node_ptr GradedUtils_nodeTimes(NuSMVEnv_ptr env,node_ptr n1, node_ptr n2, node_ptr k)
 { 
     nusmv_ptrint n1_int, n2_int, k_int;
-    
+	const NodeMgr_ptr nodemgr =
+			NODE_MGR(NuSMVEnv_get_value(env, ENV_NODE_MGR));
+
     if (node_get_type(n1) == FAILURE) return n1; /* error in previous expr */
     if (node_get_type(n2) == FAILURE) return n2; /* error in previous expr */
     if (node_get_type(k) == FAILURE) return k; /* error in previous expr */
@@ -41,20 +47,25 @@ node_ptr GradedUtils_nodeTimes(node_ptr n1, node_ptr n2, node_ptr k)
     k_int = NODE_TO_INT(car(k));
     
     if ((n1_int>0 && n2_int>0) && (n1_int> k_int / n2_int ))
-	    return find_node(NUMBER,  NODE_FROM_INT(k_int), Nil);
+	    return find_node(nodemgr,NUMBER,  NODE_FROM_INT(k_int), Nil);
 
-    return find_node(NUMBER, NODE_FROM_INT(n1_int * n2_int), Nil);
+    return find_node(nodemgr,NUMBER, NODE_FROM_INT(n1_int * n2_int), Nil);
 }
 
 
-DdNode * GradedUtils_addApply(DdManager *dd, ptruint op, DdNode *f, DdNode *g, int k)
+DdNode * GradedUtils_addApply(DDMgr_ptr dd, ptruint op, DdNode *f, DdNode *g, int k)
 {
 	DdNode *res;
-	add_ptr add_k = add_leaf(dd, find_node(NUMBER, NODE_FROM_INT(k), Nil));
+	const NuSMVEnv_ptr env = EnvObject_get_environment(ENV_OBJECT(dd));
+	const NodeMgr_ptr nodemgr =
+			NODE_MGR(NuSMVEnv_get_value(env, ENV_NODE_MGR));
+
+
+	add_ptr add_k = add_leaf(dd, find_node(nodemgr,NUMBER, NODE_FROM_INT(k), Nil));
 	do {
-		dd->reordered = 0;
+		dd->dd->reordered = 0;
 		res = GradedUtils_addApplyRecur(dd, op, f, g, add_k);
-	} while (dd->reordered == 1);
+	} while (dd->dd->reordered == 1);
 	
 		//common_error(res, "GradedUtils_addApply: result = NULL");
 	Cudd_Ref(res);
@@ -63,13 +74,14 @@ DdNode * GradedUtils_addApply(DdManager *dd, ptruint op, DdNode *f, DdNode *g, i
 } 
 
 
-DdNode * GradedUtils_addApplyRecur(DdManager *dd, ptruint op, DdNode *f, DdNode *g, DdNode *k)
+DdNode * GradedUtils_addApplyRecur(DDMgr_ptr dd, ptruint op, DdNode *f, DdNode *g, DdNode *k)
 {
 	DdNode *res,
 	*fv, *fvn, *gv, *gvn,
 	*T, *E;
 	unsigned int ford, gord;
 	unsigned int index;
+    const NuSMVEnv_ptr env = EnvObject_get_environment(ENV_OBJECT(dd));
 
     /*
 	Check for terminals. If it's the case then "op" is applied to
@@ -79,23 +91,23 @@ DdNode * GradedUtils_addApplyRecur(DdManager *dd, ptruint op, DdNode *f, DdNode 
 		CUDD_VALUE_TYPE res_n;
 
 		if (op == DD_ADD_NODE_PLUS_TAG)
-			res_n = GradedUtils_nodePlus(cuddV(f), cuddV(g), cuddV(k));
+			res_n = GradedUtils_nodePlus(env,cuddV(f), cuddV(g), cuddV(k));
 		else
-			res_n = GradedUtils_nodeTimes(cuddV(f), cuddV(g), cuddV(k));
+			res_n = GradedUtils_nodeTimes(env,cuddV(f), cuddV(g), cuddV(k));
 		if (res_n == NULL) return(NULL);
 		
-		return(cuddUniqueConst(dd,res_n));
+		return(cuddUniqueConst(dd->dd,res_n));
 	}
 
 	/* Check cache */
 	//res = cuddCacheLookup(dd,(ptruint)(op),f,g,k);
-	res = GradedUtils_cacheLookup3(dd, (ptruint)(op), f, g, k);
+	res = GradedUtils_cacheLookup3(dd->dd, (ptruint)(op), f, g, k);
 	if (res != NULL) return(res);
 
 	/* Recursive Step */
 	
-	ford = Cudd_ReadPerm(dd,f->index);
-	gord = Cudd_ReadPerm(dd,g->index);
+	ford = Cudd_ReadPerm(dd->dd,f->index);
+	gord = Cudd_ReadPerm(dd->dd,g->index);
 	if (ford <= gord) {
 		index = f->index;
 		fv = cuddT(f);
@@ -117,16 +129,16 @@ DdNode * GradedUtils_addApplyRecur(DdManager *dd, ptruint op, DdNode *f, DdNode 
 
 	E = GradedUtils_addApplyRecur(dd, op, fvn, gvn, k);
 	if (E == NULL) {
-		Cudd_RecursiveDeref(dd,T);
+		Cudd_RecursiveDeref(dd->dd,T);
 		return(NULL);
 	}
 	cuddRef(E);
 
 	/* Necessary to have ROBDD */
-	res = (T == E) ? T : cuddUniqueInter(dd,(int)index,T,E);
+	res = (T == E) ? T : cuddUniqueInter(dd->dd,(int)index,T,E);
 	if (res == NULL) {
-		Cudd_RecursiveDeref(dd, T);
-		Cudd_RecursiveDeref(dd, E);
+		Cudd_RecursiveDeref(dd->dd, T);
+		Cudd_RecursiveDeref(dd->dd, E);
 		return(NULL);
 	}
 	cuddDeref(T);
@@ -147,18 +159,21 @@ DdNode * GradedUtils_addAbstract(DDMgr_ptr dd, add_ptr a, bdd_ptr b, int k)
 {
 	DdNode * cube;
 	DdNode *res;
-	add_ptr add_k = add_leaf(dd, find_node(NUMBER, NODE_FROM_INT(k), Nil));
+	const NuSMVEnv_ptr env = EnvObject_get_environment(ENV_OBJECT(dd));
+	const NodeMgr_ptr nodemgr =
+			NODE_MGR(NuSMVEnv_get_value(env, ENV_NODE_MGR));
+	add_ptr add_k = add_leaf(dd, find_node(nodemgr,NUMBER, NODE_FROM_INT(k), Nil));
   
-	cube = Cudd_BddToAdd(dd, (DdNode *)b);
+	cube = Cudd_BddToAdd(dd->dd, (DdNode *)b);
 	//common_error(cube, "add_exist_abstract: cube = NULL");
 	Cudd_Ref(cube);
 	/**********************************************************/
 	
 
 	do {
-		dd->reordered = 0;
+		dd->dd->reordered = 0;
 		res = GradedUtils_addAbstractRecur(dd, DD_ADD_NODE_PLUS_TAG, (DdNode *)a, cube, add_k);
-	} while (dd->reordered == 1);
+	} while (dd->dd->reordered == 1);
 	
 	//common_error(res, "add_exist_abstract: result = NULL");
 	
@@ -167,12 +182,12 @@ DdNode * GradedUtils_addAbstract(DDMgr_ptr dd, add_ptr a, bdd_ptr b, int k)
 	return(res);
 }
 
-DdNode * GradedUtils_addAbstractRecur(DdManager * manager, ptruint op, DdNode * f, DdNode * cube, DdNode *k)
+DdNode * GradedUtils_addAbstractRecur(DDMgr_ptr  manager, ptruint op, DdNode * f, DdNode * cube, DdNode *k)
 {
 	DdNode	*T, *E, *res, *res1, *res2, *zero;
 
-	statLine(manager);
-	zero = DD_ZERO(manager);
+	statLine(manager->dd);
+	zero = DD_FALSE(manager->dd);
 
 	/* Cube is guaranteed to be a cube at this point. */	
 	if (f == zero || cuddIsConstant(cube)) {  
@@ -180,7 +195,7 @@ DdNode * GradedUtils_addAbstractRecur(DdManager * manager, ptruint op, DdNode * 
 	}
 
 	/* Abstract a variable that does not appear in f */
-	if (Cudd_ReadPerm(manager,f->index) > Cudd_ReadPerm(manager,cube->index)) {
+	if (Cudd_ReadPerm(manager->dd,f->index) > Cudd_ReadPerm(manager->dd,cube->index)) {
 		res1 = GradedUtils_addAbstractRecur(manager, op, f, cuddT(cube), k);
 		if (res1 == NULL) return(NULL);
 		cuddRef(res1);
@@ -190,16 +205,16 @@ DdNode * GradedUtils_addAbstractRecur(DdManager * manager, ptruint op, DdNode * 
 	*/
 		res = GradedUtils_addApplyRecur(manager, op, res1, res1, k);
 		if (res == NULL) {
-			Cudd_RecursiveDeref(manager,res1);
+			Cudd_RecursiveDeref(manager->dd,res1);
 			return(NULL);
 		}
 		cuddRef(res);
-		Cudd_RecursiveDeref(manager,res1);
+		Cudd_RecursiveDeref(manager->dd,res1);
 		cuddDeref(res);
 		return(res);
 	}
 
-	if ((res = GradedUtils_cacheLookup3(manager, (ptruint)(op), f, cube, k)) != NULL) {
+	if ((res = GradedUtils_cacheLookup3(manager->dd, (ptruint)(op), f, cube, k)) != NULL) {
 		return(res);
 	}
 
@@ -213,19 +228,19 @@ DdNode * GradedUtils_addAbstractRecur(DdManager * manager, ptruint op, DdNode * 
 		cuddRef(res1);
 		res2 = GradedUtils_addAbstractRecur(manager, op, E, cuddT(cube), k);
 		if (res2 == NULL) {
-			Cudd_RecursiveDeref(manager,res1);
+			Cudd_RecursiveDeref(manager->dd,res1);
 			return(NULL);
 		}
 		cuddRef(res2);
 		res = GradedUtils_addApplyRecur(manager, op, res1, res2, k);
 		if (res == NULL) {
-			Cudd_RecursiveDeref(manager,res1);
-			Cudd_RecursiveDeref(manager,res2);
+			Cudd_RecursiveDeref(manager->dd,res1);
+			Cudd_RecursiveDeref(manager->dd,res2);
 			return(NULL);
 		}
 		cuddRef(res);
-		Cudd_RecursiveDeref(manager,res1);
-		Cudd_RecursiveDeref(manager,res2);
+		Cudd_RecursiveDeref(manager->dd,res1);
+		Cudd_RecursiveDeref(manager->dd,res2);
 		//cuddCacheInsert(manager, (ptruint)(op), f, cube, k, res);
 		GradedUtils_cacheInsert3((ptruint)(op), f, cube, k, res);
 
@@ -237,14 +252,14 @@ DdNode * GradedUtils_addAbstractRecur(DdManager * manager, ptruint op, DdNode * 
 		cuddRef(res1);
 		res2 = GradedUtils_addAbstractRecur(manager, op, E, cube, k);
 		if (res2 == NULL) {
-			Cudd_RecursiveDeref(manager,res1);
+			Cudd_RecursiveDeref(manager->dd,res1);
 			return(NULL);
 		}
 		cuddRef(res2);
-		res = cuddUniqueInter(manager, (int) f->index, res1, res2);
+		res = cuddUniqueInter(manager->dd, (int) f->index, res1, res2);
 		if (res == NULL) {
-			Cudd_RecursiveDeref(manager,res1);
-			Cudd_RecursiveDeref(manager,res2);
+			Cudd_RecursiveDeref(manager->dd,res1);
+			Cudd_RecursiveDeref(manager->dd,res2);
 			return(NULL);
 		}
 		cuddDeref(res1);
@@ -260,7 +275,7 @@ DdNode * GradedUtils_addAbstractRecur(DdManager * manager, ptruint op, DdNode * 
 int GradedUtils_bddIsSubset(DDMgr_ptr dd, bdd_ptr a, bdd_ptr b) {
 	bdd_ptr not_b = bdd_not(dd, b);
 	bdd_ptr intersection = bdd_and(dd, a, not_b);
-	int res = bdd_is_zero(dd, intersection);
+	int res = bdd_is_false(dd, intersection);
 	
 	bdd_free(dd, not_b);
 	bdd_free(dd, intersection);
@@ -280,7 +295,10 @@ bdd_ptr GradedUtils_bddMinus(DDMgr_ptr dd, bdd_ptr a, bdd_ptr b) {
 
 //non �pi utilizzata andrebbe eliminata
 add_ptr GradedUtils_addComposition(DDMgr_ptr dd, add_ptr a, add_ptr b, int i) {
-	add_ptr add_i = add_leaf(dd, find_node(NUMBER, NODE_FROM_INT(i), Nil));
+    const NuSMVEnv_ptr env = EnvObject_get_environment(ENV_OBJECT(dd));
+    const NodeMgr_ptr nodemgr =
+            NODE_MGR(NuSMVEnv_get_value(env, ENV_NODE_MGR));
+	add_ptr add_i = add_leaf(dd, find_node(nodemgr,NUMBER, NODE_FROM_INT(i), Nil));
 	add_ptr tmp = add_apply(dd, node_times, a, add_i);
 	add_ptr result = add_apply(dd, node_plus, tmp, b);
 	
@@ -372,7 +390,7 @@ BddStates * GradedUtils_euGetIntermediateSets(BddFsm_ptr fsm, BddStates f, BddSt
 	count_paths = add_zero(dd);
 	
 	contributors_tmp = (bdd_ptr) eu(fsm, f, g);
-	contributors = BddEnc_apply_state_vars_mask_bdd(enc, contributors_tmp);
+	contributors = BddEnc_apply_state_frozen_vars_mask_bdd(enc, contributors_tmp);
 	bdd_free(dd, contributors_tmp);
 
 	for (i=1; i<=k; i++) {
@@ -431,7 +449,7 @@ BddStates * GradedUtils_egGetIntermediateSets(BddFsm_ptr fsm, BddStates f, int k
 	count_paths = add_zero(dd);
 	
 	contributors_tmp = (bdd_ptr) eg(fsm, f);
-	contributors = BddEnc_apply_state_vars_mask_bdd(enc, contributors_tmp);
+	contributors = BddEnc_apply_state_frozen_vars_mask_bdd(enc, contributors_tmp);
 	bdd_free(dd, contributors_tmp);
 
 	for (i=1; i<=k; i++) {
@@ -482,8 +500,9 @@ treeNode_ptr GradedUtils_node_ptrToTreeNode_ptr(BddFsm_ptr fsm, BddEnc_ptr enc, 
 	DDMgr_ptr dd = BddEnc_get_dd_manager(enc);
 	treeNode_ptr res, nodo;
 	node_ptr exp = reverse(path);
-	
-	if (path == NODE_PTR(0)) {
+    adjList_ptr figli;
+
+    if (path == NODE_PTR(0)) {
 		/* Trivially false */
 		bdd_ptr one = bdd_true(dd);
 		res = TreeUtils_treeNodeCreate(one, NIL(DdNode));
@@ -502,7 +521,7 @@ treeNode_ptr GradedUtils_node_ptrToTreeNode_ptr(BddFsm_ptr fsm, BddEnc_ptr enc, 
 			state = BDD_STATES(car(exp)); 
                     
 			TreeUtils_concat(nodo, TreeUtils_treeNodeCreate(state, input));
-			adjList_ptr figli  = TreeUtils_getListaFigli(nodo);
+			 figli  = TreeUtils_getListaFigli(nodo);
 			nodo = TreeUtils_getNodo(figli);
        
 			exp = cdr(exp);
@@ -512,12 +531,23 @@ treeNode_ptr GradedUtils_node_ptrToTreeNode_ptr(BddFsm_ptr fsm, BddEnc_ptr enc, 
 }
 
 
-void GradedUtils_stampaPathsRecur(BddFsm_ptr fsm, BddEnc_ptr enc, treeNode_ptr albero, int nStato, int* nTraccia, 
-	      node_ptr nodo_stampa, node_ptr input_stampa, cycleInf_ptr cicli, node_ptr pathParziale)
+void GradedUtils_stampaPathsRecur(BddFsm_ptr fsm, BddEnc_ptr enc, treeNode_ptr albero, int nStato, int* nTraccia,
+								  NodeList_ptr nodo_stampa, NodeList_ptr input_stampa, cycleInf_ptr cicli, node_ptr pathParziale)
 {
 	bdd_ptr stato, input;
 	adjList_ptr figli;
-	
+	const NuSMVEnv_ptr env = EnvObject_get_environment(ENV_OBJECT(enc));
+	const NodeMgr_ptr nodemgr =
+			NODE_MGR(NuSMVEnv_get_value(env, ENV_NODE_MGR));
+	StreamMgr_ptr streams;
+    OStream_ptr errstream;
+    node_ptr path;
+
+
+
+    streams = STREAM_MGR(NuSMVEnv_get_value(env, ENV_STREAM_MANAGER));
+	 errstream = StreamMgr_get_error_ostream(streams);
+
 	if (albero == NIL(treeNode))
 	{
 		printf("It's impossible to get the nex state\n");
@@ -528,13 +558,12 @@ void GradedUtils_stampaPathsRecur(BddFsm_ptr fsm, BddEnc_ptr enc, treeNode_ptr a
 	input = TreeUtils_getInput(albero);
 	figli = TreeUtils_getListaFigli(albero);
 	
-	node_ptr path;
-	
+
 	if(pathParziale != Nil)
-	  path = cons((node_ptr) bdd_dup(stato),
-			cons((node_ptr) bdd_dup(input), pathParziale));
+	  path = cons(nodemgr,(node_ptr) bdd_dup(stato),
+			cons(nodemgr,(node_ptr) bdd_dup(input), pathParziale));
 	else
-	  path = cons((node_ptr) bdd_dup(stato), Nil);
+	  path = cons(nodemgr,(node_ptr) bdd_dup(stato), Nil);
 	//Stampa
 	
 	
@@ -545,12 +574,12 @@ void GradedUtils_stampaPathsRecur(BddFsm_ptr fsm, BddEnc_ptr enc, treeNode_ptr a
 	printf("-> Input: %d.%d <-\n", (*nTraccia), nStato);
 	if(input != ((bdd_ptr) 0)) {
 	  BddEnc_print_bdd_begin(enc, input_stampa, 1);
-	  BddEnc_print_bdd(enc, input, nusmv_stdout);
+	  BddEnc_print_bdd(enc, input, (VPFBEFNNV) NULL, errstream, NULL);
 	  BddEnc_print_bdd_end(enc);
 	}
 
 	printf("-> State: %d.%d <-\n", (*nTraccia), nStato);
-	BddEnc_print_bdd(enc, stato, nusmv_stdout);
+	BddEnc_print_bdd(enc, stato, (VPFBEFNNV) NULL, errstream, NULL);
 	
 	nStato++;
 	while  (figli != NIL(adjList))
@@ -574,7 +603,7 @@ void GradedUtils_stampaPathsRecur(BddFsm_ptr fsm, BddEnc_ptr enc, treeNode_ptr a
 			
 			if (cicli[*nTraccia-1].nStato>0)
 			{
-			  node_ptr copiaPath = copy_list(path);
+			  node_ptr copiaPath = copy_list(nodemgr,path);
 			  treeNode_ptr newRoot = (treeNode_ptr) GradedUtils_node_ptrToTreeNode_ptr(fsm, enc, copiaPath, NIL(DdNode));
 			  
 			  GradedUtils_stampaPathsRecur(fsm, enc, newRoot, 1, nTraccia, nodo_stampa, input_stampa, cicli, Nil);
@@ -602,19 +631,33 @@ void GradedUtils_stampaPathsRecur(BddFsm_ptr fsm, BddEnc_ptr enc, treeNode_ptr a
 *********************************************************************************/
 boolean GradedUtils_stampaPaths(BddFsm_ptr fsm, BddEnc_ptr enc, treeNode_ptr albero, cycleInf_ptr cicli)
 {
-	printf("Trace Type: Counterexample\n");
+    int nTraccia;
+    NodeList_ptr svars;
+    NodeList_ptr i_symbs;
+
+//    node_ptr nodo_stampa;
+//    node_ptr input_stampa;
+    SymbTable_ptr st;
+    array_t* layers;
+    char* name;
+    boolean found;
+    node_ptr pathParziale;
+    int idx;
+
+
+    printf("Trace Type: Counterexample\n");
 	if (albero == NIL(treeNode))
 	{
 		printf("Counterexample not computed\n");
 		return 0;
 	}
 	
-	int nTraccia = 1;
-	array_t* layers = array_alloc(const char*, 1);
-	int idx;
-	SymbTable_ptr st = BaseEnc_get_symbol_table(BASE_ENC(enc));
-	char* name;
-	boolean found = false;
+	 nTraccia = 1;
+	 layers = array_alloc(const char*, 1);
+
+	 st = BaseEnc_get_symb_table(BASE_ENC(enc));
+
+	 found = false;
 	
 	arrayForEachItem(const char*, layers, idx, name){
 		if (name == (const char*) NULL) {
@@ -626,16 +669,18 @@ boolean GradedUtils_stampaPaths(BddFsm_ptr fsm, BddEnc_ptr enc, treeNode_ptr alb
 	
 	if(!found)
 		array_insert_last(const char*, layers, util_strsav((char*) MODEL_LAYER_NAME));
+
+//    SymbTable_get_layers_sf_i_symbols(
+//            BaseEnc_get_symb_table(BASE_ENC(self)), layer_names);
+	 svars = SymbTable_get_layers_sf_symbols(st, layers);
+	 i_symbs = SymbTable_get_layers_sf_i_symbols(st, layers);
 	
-	
-	NodeList_ptr svars = SymbTable_get_layers_state_symbols(st, layers);
-	NodeList_ptr i_symbs = SymbTable_get_layers_input_symbols(st, layers);
-	
-	node_ptr nodo_stampa = NodeList_to_node_ptr(svars);
-	node_ptr input_stampa = NodeList_to_node_ptr(i_symbs);
-	BddEnc_print_bdd_begin(enc, nodo_stampa, true);
-	node_ptr pathParziale = Nil;
-	GradedUtils_stampaPathsRecur(fsm, enc, albero, 1, &nTraccia, nodo_stampa, input_stampa, cicli, pathParziale);
+	 //nodo_stampa = NodeList_to_node_ptr(svars);
+	// input_stampa = NodeList_to_node_ptr(i_symbs);
+
+	BddEnc_print_bdd_begin(enc, svars, true);
+	 pathParziale = Nil;
+	GradedUtils_stampaPathsRecur(fsm, enc, albero, 1, &nTraccia, svars, i_symbs, cicli, pathParziale);
 	BddEnc_print_bdd_end(enc);
 	
 	NodeList_destroy(svars);
@@ -643,13 +688,14 @@ boolean GradedUtils_stampaPaths(BddFsm_ptr fsm, BddEnc_ptr enc, treeNode_ptr alb
 
 
 
-void GradedUtils_findCycleRecur(BddFsm_ptr fsm, BddEnc_ptr enc, DdManager *dd, treeNode_ptr albero, 
+void GradedUtils_findCycleRecur(BddFsm_ptr fsm, BddEnc_ptr enc, DDMgr_ptr dd, treeNode_ptr albero,
         bdd_ptr visitedStates, int* nTraccia, int nStato, cycleInf_ptr cicli)
 {
 	bdd_ptr stato;
 	adjList_ptr figli;
-	
-	if (albero == NIL(treeNode))
+    bdd_ptr oldVisited;
+
+    if (albero == NIL(treeNode))
 	{
 		printf("It's impossible to get the nex state\n");
 		return ;
@@ -658,11 +704,11 @@ void GradedUtils_findCycleRecur(BddFsm_ptr fsm, BddEnc_ptr enc, DdManager *dd, t
 	stato = TreeUtils_getStato(albero);
 	figli = TreeUtils_getListaFigli(albero);
 	
-    bdd_ptr oldVisited = bdd_dup(visitedStates);
+     oldVisited = bdd_dup(visitedStates);
 
     bdd_or_accumulate(dd, &visitedStates, stato);
 	
-    if (bdd_is_one(dd, (bdd_ptr) GradedMc_iff(fsm, oldVisited, visitedStates)))
+    if (bdd_is_true(dd, (bdd_ptr) GradedMc_iff(fsm, oldVisited, visitedStates)))
     {
        cicli[*nTraccia-1].nStato = nStato;
        cicli[*nTraccia-1].stato = stato;
@@ -714,14 +760,17 @@ void GradedUtils_findCycleRecur(BddFsm_ptr fsm, BddEnc_ptr enc, DdManager *dd, t
 *********************************************************************************/
 void GradedUtils_findCycle(BddFsm_ptr fsm, BddEnc_ptr enc, treeNode_ptr albero, cycleInf_ptr cicli)
 {
-    DdManager *dd = BddEnc_get_dd_manager(enc);
-	if (albero == NIL(treeNode))
+    DDMgr_ptr dd = BddEnc_get_dd_manager(enc);
+    bdd_ptr visitedStates;
+    int nTraccia;
+
+    if (albero == NIL(treeNode))
 	{
 		printf("Counterexample not computed\n");
 		return;
 	}
-	bdd_ptr visitedStates = bdd_zero(dd);
-	int nTraccia = 1;
+	 visitedStates = bdd_false(dd);
+	 nTraccia = 1;
 	
 	GradedUtils_findCycleRecur(fsm, enc, dd, albero, visitedStates, &nTraccia, 1, cicli);
 	//bdd_free(dd, visitedStates);
@@ -781,6 +830,7 @@ add_ptr GradedUtils_fsmCountSuccessors(BddFsm_ptr fsm, bdd_ptr states, int k) {
 	DDMgr_ptr dd = BddEnc_get_dd_manager(enc);
 	BddTrans_ptr trans = BddFsm_get_trans(fsm);	
 	ClusterList_ptr cluster_list = BddTrans_get_backward(trans);
+    bdd_ptr sum_variable;
 	
 	bdd_ptr primed_states;
 	add_ptr transition, result;
@@ -792,7 +842,7 @@ add_ptr GradedUtils_fsmCountSuccessors(BddFsm_ptr fsm, bdd_ptr states, int k) {
 	result = bdd_to_add(dd, primed_states);
 	bdd_free(dd, primed_states);
 	
-	bdd_ptr sum_variable = bdd_true(dd);
+	 sum_variable = bdd_true(dd);
 	iter = ClusterList_begin(cluster_list);
 	while ( ! ClusterListIterator_is_end(iter) ) {
 		cluster = ClusterList_get_cluster(cluster_list, iter);
@@ -845,8 +895,8 @@ void GradedUtils_fixPoint(BddFsm_ptr fsm, bdd_ptr* states, bdd_ptr valid) {
 	
 	while (1) {
 		//backward_tmp = BddFsm_get_backward_image(fsm, actual);
-		backward_tmp = (BddStates)ex(fsm, actual);
-		backward = BddEnc_apply_state_vars_mask_bdd(enc,backward_tmp);
+		backward_tmp = (BddStates) ex(fsm, actual);
+		backward = BddEnc_apply_state_frozen_vars_mask_bdd(enc,backward_tmp);
 		bdd_free(dd, backward_tmp);
 		bdd_and_accumulate(dd, &backward, valid);
 		
@@ -870,12 +920,12 @@ void GradedUtils_applyReachableAndMask(BddFsm_ptr fsm, bdd_ptr* states) {
 	bdd_ptr tmp;
 	
 	tmp = BddFsm_get_reachable_states(fsm);
-	reachable = BddEnc_apply_state_vars_mask_bdd(enc, tmp);
+	reachable = BddEnc_apply_state_frozen_vars_mask_bdd(enc, tmp);
 	bdd_free(dd, tmp);
 	
 	bdd_and_accumulate(dd, states, reachable);
 	
-	tmp = BddEnc_apply_state_vars_mask_bdd(enc, *states);
+	tmp = BddEnc_apply_state_frozen_vars_mask_bdd(enc, *states);
 	
 	/*Modifica effettuata da Maurizio Memoli*/
 	
@@ -907,7 +957,7 @@ void GradedUtils_applyReachableAndMaskToBackTransitions(BddFsm_ptr fsm, bdd_ptr*
 	}
 	
 	{
-		bdd_ptr mask = BddEnc_get_state_vars_mask_bdd(enc);
+		bdd_ptr mask = BddEnc_get_state_frozen_vars_mask_bdd(enc);
 		//bdd_ptr primed_mask = BddEnc_state_var_to_next_state_var(enc, mask);
 		
 		bdd_and_accumulate(dd, transition, mask);
@@ -922,7 +972,7 @@ BddStates GradedUtils_getKBackwardImage(const BddFsm_ptr fsm, BddStates states, 
 	BddEnc_ptr enc = BddFsm_get_bdd_encoding(fsm);
 	DDMgr_ptr  dd = BddEnc_get_dd_manager(enc);
    	BddStates invar = BddFsm_get_state_constraints(fsm);
-	bdd_ptr result = bdd_zero(dd);
+	bdd_ptr result = bdd_false(dd);
 	
 	BDD_FSM_CHECK_INSTANCE(fsm);
 	
@@ -946,7 +996,7 @@ BddStates GradedUtils_getKBackwardImage(const BddFsm_ptr fsm, BddStates states, 
 	
 	{
 		bdd_ptr tmp1 = bdd_and(dd, states, invar);
-		bdd_ptr tmp2 = BddEnc_apply_state_vars_mask_bdd(enc, tmp1);
+		bdd_ptr tmp2 = BddEnc_apply_state_frozen_vars_mask_bdd(enc, tmp1);
 		add_ptr tmp3 = GradedUtils_fsmCountSuccessors(fsm, tmp2, k+1);
 	
         	result = add_to_bdd_strict_threshold(dd, tmp3, k);
@@ -980,7 +1030,7 @@ BddStates GradedUtils_getKBackwardImage(const BddFsm_ptr fsm, BddStates states, 
 ******************************************************************************/
 DdNode *
 GradedUtils_bddPickOneMintermNR(
-DdManager *dd,
+DDMgr_ptr dd,
 DdNode *f,
 DdNode **vars,
 int n)
@@ -991,7 +1041,7 @@ int n)
     int result;
     DdNode *zero, *old, *new;
 
-    size = dd->size;
+    size = dd->dd->size;
     string = ALLOC(char, size);
     if (string == NULL)
 	return(NULL);
@@ -1005,7 +1055,7 @@ int n)
         indices[i] = vars[i]->index;
     }
 
-    result = Cudd_bddPickOneCubeNR(dd,f,string);
+    result = Cudd_bddPickOneCubeNR(dd->dd,f,string);
     if (result == 0) {
 	FREE(string);
 	FREE(indices);
@@ -1026,24 +1076,24 @@ int n)
     }
 
     /* Build result BDD. */
-    old = Cudd_ReadOne(dd);
+    old = Cudd_ReadOne(dd->dd);
     cuddRef(old);
-    zero = Cudd_Not(Cudd_ReadOne(dd));
+    zero = Cudd_Not(Cudd_ReadOne(dd->dd));
 
     for (i = 0; i < n; i++) {
 	if (string[indices[i]] == 0) {
-	    new = Cudd_bddIte(dd,old,Cudd_Not(vars[i]),zero);
+	    new = Cudd_bddIte(dd->dd,old,Cudd_Not(vars[i]),zero);
 	} else {
-	    new = Cudd_bddIte(dd,old,vars[i],zero);
+	    new = Cudd_bddIte(dd->dd,old,vars[i],zero);
 	}
 	if (new == NULL) {
 	    FREE(string);
 	    FREE(indices);
-	    Cudd_RecursiveDeref(dd,old);
+	    Cudd_RecursiveDeref(dd->dd,old);
 	    return(NULL);
 	}
 	cuddRef(new);
-	Cudd_RecursiveDeref(dd,old);
+	Cudd_RecursiveDeref(dd->dd,old);
 	old = new;
     }
 
@@ -1080,6 +1130,7 @@ bdd_ptr GradedUtils_bddPickOneState(const BddEnc_ptr enc, bdd_ptr fn)
   DdNode * result;
   DdNode ** vars;
   DDMgr_ptr  dd = BddEnc_get_dd_manager(enc);
+    int n;
 
 
   if (bdd_is_false(dd, fn)) {
@@ -1088,7 +1139,7 @@ bdd_ptr GradedUtils_bddPickOneState(const BddEnc_ptr enc, bdd_ptr fn)
   }
   else {
     vars = array_fetch_p(bdd_ptr, enc->minterm_state_vars, 0);
-    int n = enc->minterm_state_vars_dim;
+     n = enc->minterm_state_vars_dim;
     result = GradedUtils_bddPickOneMintermNR(dd, (DdNode *)fn, vars, n);
     //common_error(result, "GradedUtils_bddPickOneMintermNR: result = NULL");
     Cudd_Ref(result);
@@ -1113,13 +1164,15 @@ bdd_ptr GradedUtils_bddPickOneState(const BddEnc_ptr enc, bdd_ptr fn)
 
 DdNode *
 GradedUtils_AddAndAbstractRecur(
-  DdManager * manager,
+  DDMgr_ptr  manager,
   DdNode * f,
   DdNode * g,
   DdNode * cube,
   DdNode * k)
 {
-
+    const NuSMVEnv_ptr env = EnvObject_get_environment(ENV_OBJECT(manager));
+    const NodeMgr_ptr nodemgr =
+            NODE_MGR(NuSMVEnv_get_value(env, ENV_NODE_MGR));
     DdNode *ft, *fe,*gt, *ge;
     DdNode *r, *t, *e;
     unsigned int topf, topg, topcube, top, index;
@@ -1129,10 +1182,10 @@ GradedUtils_AddAndAbstractRecur(
 	
 	
 	
-    topf = Cudd_ReadPerm(manager, f->index);
-    topg = Cudd_ReadPerm(manager, g->index);
+    topf = Cudd_ReadPerm(manager->dd, f->index);
+    topg = Cudd_ReadPerm(manager->dd, g->index);
     top = ddMin(topf, topg);
-    topcube = Cudd_ReadPerm(manager, cube->index);
+    topcube = Cudd_ReadPerm(manager->dd, cube->index);
 
     if (topcube < top) {
 
@@ -1148,11 +1201,11 @@ GradedUtils_AddAndAbstractRecur(
 	
 	r = GradedUtils_addApplyRecur(manager, DD_ADD_NODE_PLUS_TAG, res1, res1, k);
 	if (r == NULL) {
-	  Cudd_RecursiveDeref(manager, res1);
+	  Cudd_RecursiveDeref(manager->dd, res1);
 	  return NULL;
 	}
 	cuddRef(r);
-	Cudd_RecursiveDeref(manager, res1);
+	Cudd_RecursiveDeref(manager->dd, res1);
 	cuddDeref(r);
 	return r;
     }
@@ -1163,14 +1216,14 @@ GradedUtils_AddAndAbstractRecur(
 	*/
 	if(cuddIsConstant(f) && cuddIsConstant(g)){
 		CUDD_VALUE_TYPE res_n;
-		res_n = GradedUtils_nodeTimes(cuddV(f), cuddV(g), cuddV(k));	
+		res_n = GradedUtils_nodeTimes(env,cuddV(f), cuddV(g), cuddV(k));
 		if (res_n == NULL) return(NULL);
 		
-		return(cuddUniqueConst(manager,res_n));
+		return(cuddUniqueConst(manager->dd,res_n));
 	}
     
 	/* Check cache */
-	r = GradedUtils_cacheLookup4(manager, (ptruint)(DD_ADD_NODE_ANDABSTRACT_TAG),f,g,cube,k);
+	r = GradedUtils_cacheLookup4(manager->dd, (ptruint)(DD_ADD_NODE_ANDABSTRACT_TAG),f,g,cube,k);
 	//r = cuddCacheLookup(manager,(ptruint)(DD_ADD_NODE_ANDABSTRACT_TAG),f,g,cube);
 	if (r != NULL) return(r);
     
@@ -1205,20 +1258,20 @@ GradedUtils_AddAndAbstractRecur(
 		
 		e = GradedUtils_AddAndAbstractRecur(manager, fe, ge, Cube, k);
 		if (e==NULL) {
-			Cudd_RecursiveDeref(manager, t);
+			Cudd_RecursiveDeref(manager->dd, t);
 			return(NULL);
 		}
 		
 		cuddRef(e);
 		r = GradedUtils_addApplyRecur(manager, DD_ADD_NODE_PLUS_TAG, t, e, k);
 		if (r == NULL) {
-			Cudd_RecursiveDeref(manager,t);
-			Cudd_RecursiveDeref(manager,e);
+			Cudd_RecursiveDeref(manager->dd,t);
+			Cudd_RecursiveDeref(manager->dd,e);
 			return(NULL);
 		}
 		cuddRef(r);
-		Cudd_RecursiveDeref(manager,t);
-		Cudd_RecursiveDeref(manager,e);
+		Cudd_RecursiveDeref(manager->dd,t);
+		Cudd_RecursiveDeref(manager->dd,e);
 		GradedUtils_cacheInsert4((ptruint)(DD_ADD_NODE_ANDABSTRACT_TAG), f, g, cube, k, r);
 		//cuddCacheInsert(manager,(ptruint)(DD_ADD_NODE_ANDABSTRACT_TAG),f,g,cube,r);
 		cuddDeref(r);
@@ -1231,14 +1284,14 @@ GradedUtils_AddAndAbstractRecur(
 		cuddRef(t);
 		e = GradedUtils_AddAndAbstractRecur(manager, fe, ge, cube, k);
 		if (e == NULL) {
-			Cudd_RecursiveDeref(manager,t);
+			Cudd_RecursiveDeref(manager->dd,t);
 			return(NULL);
 		}
 		cuddRef(e);
-		r = cuddUniqueInter(manager, (int) index, t, e);
+		r = cuddUniqueInter(manager->dd, (int) index, t, e);
 		if (r == NULL) {
-			Cudd_RecursiveDeref(manager,t);
-			Cudd_RecursiveDeref(manager,e);
+			Cudd_RecursiveDeref(manager->dd,t);
+			Cudd_RecursiveDeref(manager->dd,e);
 			return(NULL);
 		}
 		cuddDeref(t);
@@ -1268,19 +1321,22 @@ GradedUtils_AddAndAbstractRecur(
 
 ******************************************************************************/
 DdNode * GradedUtils_AddAndAbstract(
-  DdManager * manager,
+  DDMgr_ptr  manager,
   DdNode * f,
   DdNode * g,
   DdNode * cube,
   int k
 )
 {
+    const NuSMVEnv_ptr env = EnvObject_get_environment(ENV_OBJECT(manager));
+    const NodeMgr_ptr nodemgr =
+            NODE_MGR(NuSMVEnv_get_value(env, ENV_NODE_MGR));
     DdNode *res;
-    add_ptr add_k = add_leaf(manager, find_node(NUMBER, NODE_FROM_INT(k), Nil));
+    add_ptr add_k = add_leaf(manager, find_node(nodemgr,NUMBER, NODE_FROM_INT(k), Nil));
     do {
-	manager->reordered = 0;
+	manager->dd->reordered = 0;
 	res = GradedUtils_AddAndAbstractRecur(manager, f, g, cube, add_k);
-    } while (manager->reordered == 1);
+    } while (manager->dd->reordered == 1);
     cuddRef(res);
     return(res);
 

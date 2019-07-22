@@ -719,6 +719,9 @@ static void hrc_write_specifications(const NuSMVEnv_ptr env,
                        HrcNode_get_ctl_properties_iter(hrcNode),
                        "CTLSPEC\n");
   hrc_write_spec_split(env, out,
+                       HrcNode_get_gradspec_properties_iter(hrcNode),
+                       "CTLGSPEC\n");
+  hrc_write_spec_split(env, out,
                        HrcNode_get_ltl_properties_iter(hrcNode),
                        "LTLSPEC\n");
   hrc_write_spec_split(env, out,

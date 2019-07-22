@@ -166,7 +166,7 @@ static node_ptr node2maincontext(node_ptr node);
 %type <node> ctl_or_expr ctl_iff_expr ctl_implies_expr ctl_basic_expr
 %type <node> ltl_binary_expr ltl_unary_expr pure_ltl_unary_expr
 %type <node> and_expr or_expr iff_expr implies_expr basic_expr ite_expr
-%type <node> simple_expression next_expression ctl_expression ltl_expression
+%type <node> simple_expression next_expression ctl_expression ltl_expression ctlg_expression
 
 %type <node> nfun_type nfun_ftype nfunc_expr 
 

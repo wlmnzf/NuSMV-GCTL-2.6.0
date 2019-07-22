@@ -2564,6 +2564,7 @@ static node_ptr expr2bexpr_recur(BddEnc_ptr enc,
     break;
 
   case SPEC:
+  case CTLGSPEC:
   case LTLSPEC:
   case PSLSPEC:
   case INVARSPEC:

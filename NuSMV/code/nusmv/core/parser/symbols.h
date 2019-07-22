@@ -55,6 +55,9 @@ enum NUSMV_CORE_SYMBOLS {
   COMPASSION,
   SPEC,
   LTLSPEC,
+    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+            CTLGSPEC,
+    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   PSLSPEC, /* 110 */
   INVARSPEC,
   COMPUTE,
@@ -85,7 +88,16 @@ enum NUSMV_CORE_SYMBOLS {
 
   /* ---------------------------------------------------------------------- */
   NUSMV_EXPR_SYMBOL_FIRST,
-
+    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+    EGX,
+    EGG,
+    EGU,
+    EGF,
+    AGX,
+    AGG,
+    AGU,
+    AGF,
+    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   FAILURE,
   CONTEXT,
   EU,
@@ -116,6 +128,9 @@ enum NUSMV_CORE_SYMBOLS {
   LTLWFF,
   CTLWFF,
   COMPWFF,
+    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+            CTLGWFF,
+    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   ATOM, /* 160 */
   NUMBER,
   COMMA,
@@ -218,31 +233,18 @@ enum NUSMV_CORE_SYMBOLS {
   INTARRAY_TYPE, /* Represent generic array type with integer indices */
   TYPEOF, /* function for returning the type of variable */
 
-  CAST_TO_UNSIGNED_WORD, /* integer to bv conversion */
+  CAST_TO_UNSIGNED_WORD, /* integer to bv conversion */  //254
+
+
+
+
 
   NUSMV_EXPR_SYMBOL_LAST,
   /* ---------------------------------------------------------------------- */
 
-  NUSMV_CORE_SYMBOL_LAST,
+  NUSMV_CORE_SYMBOL_LAST,//
 
-    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-            CTLGSPEC,
-    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-            CTLGWFF,
-    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
-    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-            EGX,
-    EGG,
-    EGU,
-    EGF,
-    AGX,
-    AGG,
-    AGU,
-    AGF,
-    /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 };
 
 

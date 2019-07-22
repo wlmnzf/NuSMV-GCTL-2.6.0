@@ -422,6 +422,9 @@ void hrc_dumper_smv_dump_snippet(HrcDumper_ptr self,
         case Prop_Ctl:
           _HRC_DUMP_STR("CTLSPEC");
           break;
+        case Prop_Ctlg:
+        _HRC_DUMP_STR("CTLGSPEC");
+                break;
         case Prop_Ltl:
           _HRC_DUMP_STR("LTLSPEC");
           break;

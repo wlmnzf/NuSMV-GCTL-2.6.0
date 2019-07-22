@@ -314,6 +314,12 @@ int printer_sexp_core_print_node(PrinterBase_ptr self, node_ptr node,
       _PRINT(")");
     break;
 
+  case CTLGSPEC:
+      result = _PRINT("\n(CTLGSPEC ") &&
+               _THROW(car(node), 0) &&
+               _PRINT(")");
+          break;
+
   case LTLSPEC:
     result = _PRINT("\n(LTLSPEC ") &&
       _THROW(car(node), 0) &&
