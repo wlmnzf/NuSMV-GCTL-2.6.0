@@ -15,4 +15,5 @@ next(state):=case
 		esac;
 
 CTLGRADSPEC !EF 1 (state=6)
+--SPEC !EF(state=6)
 

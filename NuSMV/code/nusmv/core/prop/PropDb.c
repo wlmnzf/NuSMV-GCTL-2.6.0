@@ -184,7 +184,7 @@ int PropDb_fill(PropDb_ptr self, SymbTable_ptr symb_table,
 
   /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   for(l = ctlgspec; l != Nil; l = cdr(l)) {
-    res = PropDb_prop_create_and_add(self,symb_table, car(l), Prop_Ctlg);
+    res = PropDb_prop_create_and_add(self,symb_table, car(car(l)), Prop_Ctlg);
     if (res == -1) return 1;
   }
   /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -760,6 +760,7 @@ const NodeMgr_ptr nodemgr =
 
   for (i = 0; i < PropDb_get_size(self); ++i) {
     Prop_ptr prop = PropDb_get_prop_at_index(self, i);
+
     Set_t cone = Prop_compute_cone(prop, hierarchy, symb_table);
     int card = Set_GiveCardinality(cone);
     boolean inserted = false;

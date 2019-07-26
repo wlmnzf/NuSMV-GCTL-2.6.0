@@ -78,6 +78,7 @@ void CInit_batch_main(NuSMVEnv_ptr env)
   streams = STREAM_MGR(NuSMVEnv_get_value(env, ENV_STREAM_MANAGER));
   outstream = StreamMgr_get_output_ostream(streams);
 
+//    unset_use_coi_size_sorting(opts);
   /* Necessary to have standard behavior in the batch mode */
   ErrorMgr_reset_long_jmp(errmgr);
   CATCH(errmgr) {
@@ -401,7 +402,8 @@ void CInit_batch_main(NuSMVEnv_ptr env)
         /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
         /* Evaluates the GCTL Specifications */
         if (!opt_ignore_gradspec(opts)) {
-            res |= PropDb_check_property(prop_db, Prop_Ctlg, NULL, prop_no);
+         //   unset_use_coi_size_sorting(opts);
+             res |= PropDb_check_property(prop_db, Prop_Ctlg, NULL, prop_no);
         }
         /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
         if (!opt_ignore_ltlspec(opts)) {

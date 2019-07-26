@@ -187,6 +187,9 @@ dependency_core_get_dependencies(DependencyBase_ptr self,
                                  preserve_time, time, &key);
 
   switch (node_get_type(formula)) {
+//      case CTLGSPEC:
+//        printf("110\n");
+//        break;
   case CONTEXT:
     result = _THROW(symb_table, cdr(formula), car(formula), filter,
                     preserve_time, time, dependencies_hash);

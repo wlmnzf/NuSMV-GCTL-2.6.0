@@ -1,0 +1,13 @@
+digraph Tree {
+    node [fontname="Arial"];
+   "0 : CONTEXT" -> "1 : NOT";
+   "1 : NOT" -> "2 : EGF";
+   "2 : EGF" -> "3 : EF";
+   "3 : EF" -> "4 : EQUAL";
+   "4 : EQUAL" -> "5 : ATOM";
+   "5 : ATOM" -> "6 : state";
+   "4 : EQUAL" -> "7 : NUMBER";
+   "7 : NUMBER" -> "8 : 【6】";
+   "2 : EGF" -> "9 : NUMBER";
+   "9 : NUMBER" -> "10 : 【1】";
+}

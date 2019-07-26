@@ -1313,6 +1313,7 @@ bdd_ptr bdd_not(DDMgr_ptr dd, bdd_ptr fn)
     ERROR_MGR(NuSMVEnv_get_value(env, ENV_ERROR_MANAGER));
   DdNode * result;
 
+  printf("NOT\n");
   result = Cudd_Not(fn);
   common_error(errmgr, result, "bdd_not: result == NULL");
   Cudd_Ref(result);

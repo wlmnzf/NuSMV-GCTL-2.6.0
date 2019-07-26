@@ -19,6 +19,7 @@
 
 #include "ModelChecking.h"
 
+
 static char rcsid[] UTIL_UNUSED = "$Id: ModelChecking.c,v 1.0.3 2008/12/05 08:55:58 nusmv Exp $";
 
 /*---------------------------------------------------------------------------*/
@@ -57,6 +58,7 @@ void GradedMc_checkGradedCtlSpec(NuSMVEnv_ptr env,Prop_ptr prop) {
 	Expr_ptr spec = Prop_get_expr_core(prop);
 	StreamMgr_ptr streams;
     treeNode_ptr albero;
+    FILE *fp;
     int j;
     int nTracce = 1;
 	cycleInf_ptr cicli;
@@ -66,6 +68,7 @@ void GradedMc_checkGradedCtlSpec(NuSMVEnv_ptr env,Prop_ptr prop) {
 	const OptsHandler_ptr opts =
 			OPTS_HANDLER(NuSMVEnv_get_value(env, ENV_OPTS_HANDLER));
 	streams = STREAM_MGR(NuSMVEnv_get_value(env, ENV_STREAM_MANAGER));
+
 //	const NuSMVEnv_ptr env = Be_Manager_GetEnvironment(manager);
 
 
@@ -114,7 +117,22 @@ void GradedMc_checkGradedCtlSpec(NuSMVEnv_ptr env,Prop_ptr prop) {
 	
 	if (bdd_is_false(dd, fair))
 		ErrorMgr_warning_fsm_fairness_empty(errmgr);
-	
+
+
+  fp = fopen("/mnt/d/WSL/NuSMV-2.6.0-MultiCE/NuSMV/test/spec.dot", "w");
+
+
+              if (fp == NULL)
+                  printf("fail to open the file! \n");
+              else {
+                  printf("The file is open! \n");
+                  bst_print_dot(spec, fp);
+
+                  fclose(fp);
+              }
+
+
+
 	/* Evaluates the spec */
 	tmp1 = GradedMc_evalGradedCtlSpec(fsm, enc, spec, Nil);
 	tmp2 = bdd_not(dd, tmp1);
@@ -124,9 +142,9 @@ void GradedMc_checkGradedCtlSpec(NuSMVEnv_ptr env,Prop_ptr prop) {
 	bdd_and_accumulate(dd, &tmp2, fair);
 	bdd_and_accumulate(dd, &tmp2, initial);
 
-	states =BddEnc_apply_state_frozen_vars_mask_bdd(enc, tmp2);
+	 states =BddEnc_apply_state_frozen_vars_mask_bdd(enc, tmp2);
 //    states = BddEnc_apply_state_vars_mask_bdd(enc, tmp2);
-    bdd_free(dd, tmp2);
+    //bdd_free(dd, tmp2);
 		
 	/* Prints out the result, if not true explain. */
 //	fprintf(nusmv_stdout, "-- ");
@@ -237,7 +255,7 @@ void GradedMc_checkGradedCtlSpec(NuSMVEnv_ptr env,Prop_ptr prop) {
 //		}
 	}
 	
-	bdd_free(dd, states);
+	bdd_free(dd, tmp2);
 	//bdd_free(dd, tmp1);
 	bdd_free(dd, initial);
 	bdd_free(dd, constraints);

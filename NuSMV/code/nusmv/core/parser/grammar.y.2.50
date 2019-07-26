@@ -836,13 +836,16 @@ ctlspec       : TOK_SPEC _ctlspec {$$ = new_lined_node(NODEMGR, SPEC, $2, Nil, $
               | TOK_CTLSPEC TOK_NAME var_id TOK_EQDEF _ctlspec {$$ = new_lined_node(NODEMGR, SPEC, $5, $3, $1);}
 ;
 
-_ctlgspec      : ctlg_expression optsemi { $$ = $1; }
+/*_ctlgspec      : ctlg_expression optsemi { $$ = $1; }
               | ctlg_expression TOK_INCONTEXT context optsemi {$$ = new_node(NODEMGR, CONTEXT, $3, $1);}
 ;
 ctlgspec       : TOK_CTLGSPEC _ctlgspec {$$ = new_lined_node(NODEMGR, CTLGSPEC, $2, Nil, $1);}
               | TOK_CTLGSPEC TOK_NAME var_id TOK_EQDEF  _ctlgspec {$$ = new_lined_node(NODEMGR, CTLGSPEC, $5, $3, $1);}
 
-;
+;*/
+
+ctlgspec      : TOK_CTLGSPEC ctlg_basic_expr optsemi {$$ = new_lined_node(NODEMGR,CTLGSPEC, $2, Nil, $1);}
+              ;
 
 _ltlspec      : ltl_expression optsemi { $$ = $1; }
               | ltl_expression TOK_INCONTEXT context optsemi {$$ = new_node(NODEMGR, CONTEXT, $3, $1);}
@@ -871,8 +874,7 @@ pslspec       : TOK_PSLSPEC
               ;
 
 /****************************/
-/*ctlgspec      : TOK_CTLGSPEC ctlg_basic_expr optsemi {$$ = new_lined_node(NODEMGR,CTLGSPEC, $2, Nil, $1);}
-              ;*/
+
 
 
 constants     : TOK_CONSTANTS constants_expression TOK_SEMI

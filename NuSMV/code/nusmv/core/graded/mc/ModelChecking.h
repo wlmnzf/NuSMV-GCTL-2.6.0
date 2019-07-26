@@ -47,6 +47,7 @@
 #include "nusmv/core/graded/mc/Eval.h"
 #include "nusmv/core/graded/mc/Explain.h"
 #include "nusmv/core/graded/utils/GradedUtils.h"
+#include "nusmv/core/mc/printinfo.h"
 
 /*---------------------------------------------------------------------------*/
 /* Function prototypes                                                       */

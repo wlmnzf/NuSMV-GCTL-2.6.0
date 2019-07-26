@@ -604,6 +604,7 @@ BddStates GradedMc_ef(BddFsm_ptr fsm, BddStates g, int k) {
     
     one = bdd_true(dd);                      // True
     result = GradedMc_eu(fsm, one, g, k);   // E^{>k} True U \psi_1
+    //some problems
     
     bdd_free(dd, one);
     

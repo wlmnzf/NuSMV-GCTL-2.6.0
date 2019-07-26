@@ -53,12 +53,12 @@ enum NUSMV_CORE_SYMBOLS {
   FAIRNESS,
   JUSTICE,
   COMPASSION,
-  SPEC,
+  SPEC,//108
   LTLSPEC,
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-            CTLGSPEC,
+            CTLGSPEC,/* 110 */
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-  PSLSPEC, /* 110 */
+  PSLSPEC,
   INVARSPEC,
   COMPUTE,
   DEFINE,
@@ -67,8 +67,8 @@ enum NUSMV_CORE_SYMBOLS {
   CONSTRAINT,
   MODULE,
   PROCESS,
-  MODTYPE,
-  LAMBDA, /* 120 */
+  MODTYPE,/* 120 */
+  LAMBDA,
   CONSTANTS,
 
   /* To be moved elsewhere */
@@ -87,7 +87,7 @@ enum NUSMV_CORE_SYMBOLS {
 
 
   /* ---------------------------------------------------------------------- */
-  NUSMV_EXPR_SYMBOL_FIRST,
+  NUSMV_EXPR_SYMBOL_FIRST,/* 130 */
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     EGX,
     EGG,
@@ -99,7 +99,7 @@ enum NUSMV_CORE_SYMBOLS {
     AGF,
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   FAILURE,
-  CONTEXT,
+  CONTEXT, /* 140 */
   EU,
   AU,
   EBU,
@@ -108,22 +108,22 @@ enum NUSMV_CORE_SYMBOLS {
   MAXU,
   VAR,
   FROZENVAR,
-  IVAR, /* 140 */
-  BOOLEAN,
+  IVAR,
+  BOOLEAN,/* 150 */
   ARRAY,
   SCALAR,
   CONS,
-  BDD, /* 145 */
-  SEMI,
+  BDD,
+  SEMI,/* 150 */
   EQDEF,
   TWODOTS,
   FALSEEXP,
-  TRUEEXP, /* 150 */
-  SELF,
+  TRUEEXP,
+  SELF,/* 160 */
   CASE,
   COLON,
-  IFTHENELSE,
-  SIMPWFF, /* 155 */
+  IFTHENELSE,//163
+  SIMPWFF,
   NEXTWFF,
   LTLWFF,
   CTLWFF,
@@ -131,7 +131,7 @@ enum NUSMV_CORE_SYMBOLS {
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
             CTLGWFF,
     /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-  ATOM, /* 160 */
+  ATOM, /* 170 */
   NUMBER,
   COMMA,
   IMPLIES,
@@ -141,7 +141,7 @@ enum NUSMV_CORE_SYMBOLS {
   XNOR,
   AND,
   NOT,
-  EX,
+  EX,/* 180 */
   AX,
   EF,
   AF,
@@ -151,7 +151,7 @@ enum NUSMV_CORE_SYMBOLS {
   UNTIL,
   TRIGGERED,
   RELEASES,
-  EBF, /* 180 */
+  EBF, /* 190 */
   EBG,
   ABF,
   ABG,
@@ -161,7 +161,7 @@ enum NUSMV_CORE_SYMBOLS {
   OP_PREC,
   OP_NOTPRECNOT,
   OP_HISTORICAL,
-  OP_ONCE,
+  OP_ONCE,/* 200 */
   EQUAL,
   NOTEQUAL,
   LT,
@@ -171,17 +171,17 @@ enum NUSMV_CORE_SYMBOLS {
   UNION,
   SETIN,
   MOD,
-  PLUS, /* 200 */
+  PLUS, /* 210 */
   MINUS,
   TIMES,
   DIVIDE,
   UMINUS,
-  NEXT, /* 205 */
+  NEXT, /* 215 */
   SMALLINIT,
   DOT,
   BIT,
   RANGE,
-  UNSIGNED_WORD, /* identifies expressions and types */
+  UNSIGNED_WORD, /* identifies expressions and types *//* 220 */
   SIGNED_WORD,   /* identifies types */
   INTEGER,
   REAL,
@@ -191,8 +191,8 @@ enum NUSMV_CORE_SYMBOLS {
   NUMBER_FRAC,
   NUMBER_REAL,
   NUMBER_EXP,
-  LSHIFT,
-  RSHIFT, /* 220 */
+  LSHIFT,/* 230 */
+  RSHIFT,
   LROTATE,
   RROTATE,
   BIT_SELECTION,
@@ -201,7 +201,7 @@ enum NUSMV_CORE_SYMBOLS {
   CAST_WORD1,
   CAST_SIGNED,
   CAST_UNSIGNED,
-  EXTEND, /* 230 extend the width of a word (signed or unsigned) */
+  EXTEND, /* 240 extend the width of a word (signed or unsigned) */
   WORDARRAY,
   WAREAD,
   WAWRITE,

@@ -686,6 +686,7 @@ add_ptr BddEnc_expr_to_add(BddEnc_ptr self, const Expr_ptr expr,
   OptsHandler_ptr opts;
   NuSMVEnv_ptr env;
   MasterPrinter_ptr wffprint;
+//    Logger_ptr logger;
 
   BDD_ENC_CHECK_INSTANCE(self);
 
