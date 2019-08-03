@@ -7,7 +7,7 @@ digraph Tree {
    "4 : EQUAL" -> "5 : ATOM";
    "5 : ATOM" -> "6 : state";
    "4 : EQUAL" -> "7 : NUMBER";
-   "7 : NUMBER" -> "8 : 【6】";
+   "7 : NUMBER" -> "8 : 【1】";
    "2 : EGF" -> "9 : NUMBER";
    "9 : NUMBER" -> "10 : 【1】";
 }

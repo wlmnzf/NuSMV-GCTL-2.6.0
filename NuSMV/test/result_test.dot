@@ -1,0 +1,30 @@
+digraph "DD" {
+size = "7.5,10"
+center = true;
+edge [dir = none];
+{ node [shape = plaintext];
+  edge [style = invis];
+  "CONST NODES" [style = invis];
+" next(state.1) " -> " next(state.0) " -> "CONST NODES"; 
+}
+{ rank = same; node [shape = box]; edge [style = invis];
+"F0"; }
+{ rank = same; " next(state.1) ";
+"303";
+}
+{ rank = same; " next(state.0) ";
+"298";
+}
+{ rank = same; "CONST NODES";
+{ node [shape = box]; "253" [label = "TRUE"];
+"254" [label = "FALSE"];
+}
+}
+"F0" -> "303" [style = solid];
+"303" -> "298";
+"303" -> "253" [style = dashed];
+"298" -> "254";
+"298" -> "253" [style = dashed];
+"253" [label = "TRUE"];
+"254" [label = "FALSE"];
+}

@@ -17,10 +17,13 @@
 
 ******************************************************************************/
 
+#include <nusmv/core/dd/DDMgr_private.h>
 #include "ModelChecking.h"
 
 
 static char rcsid[] UTIL_UNUSED = "$Id: ModelChecking.c,v 1.0.3 2008/12/05 08:55:58 nusmv Exp $";
+
+
 
 /*---------------------------------------------------------------------------*/
 /* Variable declarations                                                     */
@@ -57,10 +60,13 @@ void GradedMc_checkGradedCtlSpec(NuSMVEnv_ptr env,Prop_ptr prop) {
 	DDMgr_ptr dd;
 	Expr_ptr spec = Prop_get_expr_core(prop);
 	StreamMgr_ptr streams;
+	OStream_ptr outstream;
     treeNode_ptr albero;
     FILE *fp;
     int j;
     int nTracce = 1;
+    char** argv[4]={"dump_fsm","-o","/mnt/d/WSL/NuSMV-2.6.0-MultiCE/NuSMV/test/fsm.dot","-t"};
+    //-iItr
 	cycleInf_ptr cicli;
 	const ErrorMgr_ptr errmgr =
 			ERROR_MGR(NuSMVEnv_get_value(env, ENV_ERROR_MANAGER));
@@ -68,6 +74,8 @@ void GradedMc_checkGradedCtlSpec(NuSMVEnv_ptr env,Prop_ptr prop) {
 	const OptsHandler_ptr opts =
 			OPTS_HANDLER(NuSMVEnv_get_value(env, ENV_OPTS_HANDLER));
 	streams = STREAM_MGR(NuSMVEnv_get_value(env, ENV_STREAM_MANAGER));
+    outstream = StreamMgr_get_output_ostream(streams);
+
 
 //	const NuSMVEnv_ptr env = Be_Manager_GetEnvironment(manager);
 
@@ -127,7 +135,18 @@ void GradedMc_checkGradedCtlSpec(NuSMVEnv_ptr env,Prop_ptr prop) {
               else {
                   printf("The file is open! \n");
                   bst_print_dot(spec, fp);
+               //   test_bdd(dd->dd);
+                  //Compile_print_fsm_stats(env, fsm, outstream, true);
 
+
+//                  dump_fsm -o test1.dot -iItr
+
+//mask=65535
+//                  (ptruint) ((mask & (ptrint) scan) /
+//                             sizeof(DdNode)),
+//                          (ptruint) ((mask & (ptrint) cuddE(scan)) /
+//                                     sizeof(DdNode)));
+                  CommandDumpFsm(env,4,argv);
                   fclose(fp);
               }
 
@@ -135,13 +154,33 @@ void GradedMc_checkGradedCtlSpec(NuSMVEnv_ptr env,Prop_ptr prop) {
 
 	/* Evaluates the spec */
 	tmp1 = GradedMc_evalGradedCtlSpec(fsm, enc, spec, Nil);
+    printf("**************S0**************\n");
+    BddEnc_print_set_of_states(BddFsm_get_bdd_encoding(fsm), tmp1, false, true,(VPFBEFNNV) NULL,outstream,NULL);
+    printf("**************S0**************\n");
+
+//    BddEnc_print_set_of_states(enc, tmp1, false,true, (VPFNNF) NULL,
+//                               outstream,NULL);
+
+
+//tmp1为满足specification的状态，如果！tmp1余初始状态集合的交集费控，则说明从初始状态开始存在不满足的路径，模型检验失败
 	tmp2 = bdd_not(dd, tmp1);
+    printf("**************！S0**************\n");
+    BddEnc_print_set_of_states(BddFsm_get_bdd_encoding(fsm), tmp2, false, true,(VPFBEFNNV) NULL,outstream,NULL);
+    printf("**************！S0**************\n");
 	bdd_free(dd, tmp1);
     
     bdd_and_accumulate(dd, &tmp2, constraints);
 	bdd_and_accumulate(dd, &tmp2, fair);
 	bdd_and_accumulate(dd, &tmp2, initial);
 
+    printf("**************initial**************\n");
+    BddEnc_print_set_of_states(BddFsm_get_bdd_encoding(fsm), initial, false, true,(VPFBEFNNV) NULL,outstream,NULL);
+    printf("**************initial**************\n");
+//
+//    BddEnc_print_set_of_states(enc, initial , false,true, (VPFNNF) NULL,
+//                               outstream,NULL);
+//    BddEnc_print_set_of_states(enc, tmp2 , false,true, (VPFNNF) NULL,
+//                               outstream,NULL);
 	 states =BddEnc_apply_state_frozen_vars_mask_bdd(enc, tmp2);
 //    states = BddEnc_apply_state_vars_mask_bdd(enc, tmp2);
     //bdd_free(dd, tmp2);
@@ -167,12 +206,14 @@ void GradedMc_checkGradedCtlSpec(NuSMVEnv_ptr env,Prop_ptr prop) {
 		Prop_set_status(prop, Prop_False);
 
 		//return;
-		/*printf("mau prima\n");
-		dd_printminterm(dd_manager, states);*/
+//		printf("mau prima\n");
+//		dd_printminterm(dd, states);
+
 		tmp1 = GradedUtils_bddPickOneState(enc, states);
-		/*printf("stato selezionato\n");
-		dd_printminterm(dd_manager, tmp1);
-		printf("mau dopo\n");*/
+
+//		printf("stato selezionato\n");
+//		dd_printminterm(dd, tmp1);
+//		printf("mau dopo\n");
 		
 		 nTracce = 1;
 		 albero = GradedMc_explainGraded(fsm, enc, tmp1, spec, Nil);

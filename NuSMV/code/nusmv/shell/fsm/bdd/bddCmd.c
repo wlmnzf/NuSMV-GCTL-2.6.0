@@ -68,7 +68,7 @@ int CommandPrintReachableStates(NuSMVEnv_ptr env, int argc, char** argv);
 int CommandPrintFairStates(NuSMVEnv_ptr env, int argc, char** argv);
 int CommandPrintFairTransitions(NuSMVEnv_ptr env, int argc, char** argv);
 int CommandPrintFairStateInputPairs(NuSMVEnv_ptr env, int argc, char** argv);
-int CommandDumpFsm(NuSMVEnv_ptr env, int argc, char** argv);
+//int CommandDumpFsm(NuSMVEnv_ptr env, int argc, char** argv);
 
 /*---------------------------------------------------------------------------*/
 /* Constant declarations                                                     */

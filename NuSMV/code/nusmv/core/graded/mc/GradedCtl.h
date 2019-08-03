@@ -28,6 +28,7 @@
 #include "nusmv/core/utils/error.h"
 #include "nusmv/core/utils/utils.h"
 #include "nusmv/core/utils/utils_io.h"
+#include "cudd/cuddInt.h"
 
 #include "nusmv/core/graded/mc/Eval.h"
 #include "nusmv/core/graded/mc/Explain.h"

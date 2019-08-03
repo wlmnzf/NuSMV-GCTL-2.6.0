@@ -1034,6 +1034,8 @@ void BddEnc_print_set_of_states(BddEnc_ptr self, bdd_ptr states,
       }
     }
   }
+//    vars = NodeList_to_node_ptr(
+//            SymbTable_get_state_vars(BASE_ENC(self)->symb_table));
 
   BddEnc_print_bdd_begin(self, committed_vars, changes_only);
 

@@ -14,7 +14,9 @@
 
 ******************************************************************************/
 
+#include <nusmv/core/dd/DDMgr_private.h>
 #include "GradedCtl.h"
+//#include "../../../../../../cudd-2.4.1.1/cudd/cuddInt.h"
 
 static char rcsid[] UTIL_UNUSED = "$Id: GradedCtl.c,v 1.0.3 2008/12/05 08:55:58 nusmv Exp $";
 
@@ -269,8 +271,8 @@ BddStates GradedMc_ex(BddFsm_ptr fsm, BddStates g, int k) {
 	}
 
 	result = GradedUtils_getKBackwardImage(fsm, states, k);
-	//dd_printminterm(dd, result);
-	//BddEnc_print_set_of_states(BddFsm_get_bdd_encoding(fsm), result, 0, stdout);
+//	dd_printminterm(dd, result);
+	//BddEnc_print_set_of_states(BddFsm_get_bdd_encoding(fsm), result, false, true,(VPFBEFNNV) NULL,stdout,NULL);
 
 	bdd_free(dd, states);
 
@@ -331,38 +333,104 @@ BddStates GradedMc_ax(BddFsm_ptr fsm, BddStates g, int k) {
         Check the formula E^{>k} \psi_1 U \psi_2
 *********************************************************************************/
 BddStates GradedMc_eu(BddFsm_ptr fsm, BddStates f, BddStates g, int k) {
-	if (k == 0) {
+    BddEnc_ptr enc = BddFsm_get_bdd_encoding(fsm);
+    DDMgr_ptr dd = BddEnc_get_dd_manager(enc);
+    const NuSMVEnv_ptr env = EnvObject_get_environment(ENV_OBJECT(enc));
+    const StreamMgr_ptr streams =
+            STREAM_MGR(NuSMVEnv_get_value(env, ENV_STREAM_MANAGER));
+    const OStream_ptr outstream = StreamMgr_get_output_ostream(streams);
+    add_ptr count_paths, adding_paths, temp_count_paths;
+
+    if (k == 0) {
 		BddStates states = eu(fsm, f, g);
+        printf("**************EU**************\n");
+        BddEnc_print_set_of_states(BddFsm_get_bdd_encoding(fsm), states, false, true,(VPFBEFNNV) NULL,outstream,NULL);
+        printf("**************EU**************\n");
 		return states;
 	}
 	
 	{
-		BddEnc_ptr enc = BddFsm_get_bdd_encoding(fsm);
-		DDMgr_ptr dd = BddEnc_get_dd_manager(enc);
-			
-		add_ptr count_paths, adding_paths, temp_count_paths;
 		bdd_ptr contributors, contributors_tmp, pred;
 		int i;
+        BddStates reachable;
+        bdd_ptr tmp;
 
-		count_paths = add_zero(dd);
+        tmp = BddFsm_get_reachable_states(fsm);
+        reachable = BddEnc_apply_state_frozen_vars_mask_bdd(enc, tmp);
+
+        printf("**************reachable**************\n");
+        BddEnc_print_set_of_states(BddFsm_get_bdd_encoding(fsm), reachable, false, true,(VPFBEFNNV) NULL,outstream,NULL);
+        printf("**************reachable**************\n");
+
+
+		count_paths = add_false(dd);
 		
 		contributors_tmp = eu(fsm, f, g);
+
+        printf("**************f**************\n");
+        BddEnc_print_set_of_states(BddFsm_get_bdd_encoding(fsm), f, false, true,(VPFBEFNNV) NULL,outstream,NULL);
+        printf("**************f**************\n");
+
+        printf("**************g**************\n");
+        BddEnc_print_set_of_states(BddFsm_get_bdd_encoding(fsm), g, false, true,(VPFBEFNNV) NULL,outstream,NULL);
+        printf("**************g**************\n");
+
+		printf("**************EU**************\n");
+        BddEnc_print_set_of_states(BddFsm_get_bdd_encoding(fsm), contributors_tmp, false, true,(VPFBEFNNV) NULL,outstream,NULL);
+        BddFsm_print_fair_state_input_pairs(fsm,env,outstream,true);
+//        write_dd(dd->dd, contributors_tmp, "/mnt/d/WSL/NuSMV-2.6.0-MultiCE/NuSMV/test/bdd.dot");  /*Write the resulting cascade dd to a file*/
+        printf("**************EU**************\n");
+       // BddEnc_print_set_of_trans_models(enc,contributors_tmp,outstream);
+
 		contributors = BddEnc_apply_state_frozen_vars_mask_bdd(enc, contributors_tmp);
+//        BddEnc_print_set_of_states(enc, contributors, false,true, (VPFNNF) NULL,
+//                                   outstream,NULL);
+        printf("**************contributors**************\n");
+        BddEnc_print_set_of_states(enc, contributors, false,true, (VPFNNF) NULL,outstream,NULL);
+//        write_dd(dd->dd, contributors, "/mnt/d/WSL/NuSMV-2.6.0-MultiCE/NuSMV/test/bdd.dot");  /*Write the resulting cascade dd to a file*/
+        printf("**************contributors**************\n");
+
 		bdd_free(dd, contributors_tmp);
 		
 		for (i=1; i<=k; i++) {
 			adding_paths = GradedUtils_fsmCountSuccessors(fsm, contributors, k+1);
+//            sprintf(filename, "./bdd/graph.dot"); /*Write .dot filename to a string*/
+           //  write_dd(dd->dd, adding_paths, "/mnt/d/WSL/NuSMV-2.6.0-MultiCE/NuSMV/test/bdd.dot");  /*Write the resulting cascade dd to a file*/
+//            printf("/***********adding_paths**********/\n");
+//            BddEnc_print_set_of_states(enc, adding_paths, false,true, (VPFNNF) NULL,outstream,NULL);
+//            printf("/***********adding_paths**********/\n");
+
 			bdd_free(dd, contributors);
+			//aplly ADD_AND countpaths addingpaths
 			GradedUtils_addSum(dd, &count_paths, adding_paths, k+1);
 			add_free(dd, adding_paths);
+			//Converts an ADD to a BDD by replacing all discriminants greater than value k with 1, and all other discriminants with 0. Returns a pointer to the resulting BDD if successful; a failure is generated otherwise.
 			contributors = add_to_bdd_strict_threshold(dd, count_paths, i);
+
+            printf("**************contributors %d **************\n",i);
+            BddEnc_print_set_of_states(enc, contributors, false,true, (VPFNNF) NULL,outstream,NULL);
+            printf("**************contributors %d **************\n",i);
+			//与可达状态进行与操作
 			GradedUtils_applyReachableAndMask(fsm, &contributors);
 			bdd_and_accumulate(dd, &contributors, f);
 			GradedUtils_fixPoint(fsm, &contributors, f);
+            printf("**************contributors**************\n");
+            BddEnc_print_set_of_states(enc, contributors, false,true, (VPFNNF) NULL,outstream,NULL);
+            printf("**************contributors**************\n");
         	}
-		
+
+       // dd_printminterm(dd, contributors);
+
+//        BddEnc_print_set_of_states(enc, contributors, false,true, (VPFNNF) NULL,
+//                                   outstream,NULL);
+
+    //    BddEnc_print_set_of_trans_models(enc, contributors,outstream);
+
 		add_free(dd, count_paths);
-		
+
+        printf("**************contributors**************\n");
+        BddEnc_print_set_of_states(BddFsm_get_bdd_encoding(fsm), contributors, false, true,(VPFBEFNNV) NULL,outstream,NULL);
+        printf("**************contributors**************\n");
 		return contributors;
 	}
 }
@@ -413,9 +481,9 @@ BddStates GradedMc_au(BddFsm_ptr fsm, BddStates f, BddStates g, int k) {
  		
 
 
-		count_paths = add_zero(dd);
-		count_paths_1 = add_zero(dd);
-		count_paths_2 = add_zero(dd);
+		count_paths = add_false(dd);
+		count_paths_1 = add_false(dd);
+		count_paths_2 = add_false(dd);
 		
 		{
             add_ptr tmp;
@@ -512,7 +580,7 @@ BddStates GradedMc_eg(BddFsm_ptr fsm, BddStates g, int k) {
 		bdd_ptr contributors, contributors_tmp, pred;
 		int i;
 
-		count_paths = add_zero(dd);
+		count_paths = add_false(dd);
 		
 		contributors_tmp = eg(fsm, g);
 		contributors = BddEnc_apply_state_frozen_vars_mask_bdd(enc, contributors_tmp);

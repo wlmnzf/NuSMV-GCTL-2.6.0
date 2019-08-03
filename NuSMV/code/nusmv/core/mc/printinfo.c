@@ -374,3 +374,146 @@ void bst_print_dot(struct node * tree, FILE* stream)
 
     fprintf(stream, "}\n");
 }
+
+
+
+
+
+void print_dd (DdManager *gbm, DdNode *dd, int n, int pr )
+{
+    printf("DdManager nodes: %ld | ", Cudd_ReadNodeCount(gbm)); /*Reports the number of live nodes in BDDs and ADDs*/
+    printf("DdManager vars: %d | ", Cudd_ReadSize(gbm) ); /*Returns the number of BDD variables in existence*/
+    printf("DdManager reorderings: %d | ", Cudd_ReadReorderings(gbm) ); /*Returns the number of times reordering has occurred*/
+    printf("DdManager memory: %ld \n", Cudd_ReadMemoryInUse(gbm) ); /*Returns the memory in use by the manager measured in bytes*/
+    Cudd_PrintDebug(gbm, dd, n, pr);  // Prints to the standard output a DD and its statistics: number of nodes, number of leaves, number of minterms.
+}
+
+
+/**
+ * Writes a dot file representing the argument DDs
+ * @param the node object
+ */
+void write_dd (DdManager *gbm, DdNode *dd, char* filename)
+{
+    DdNode **ddnodearray = (DdNode**)malloc(sizeof(DdNode*)); // initialize the function array
+    FILE *outfile; // output file pointer for .dot file
+    outfile = fopen(filename,"w");
+    if (outfile == NULL) {
+        printf("fail to write bdd! \n");
+        return;
+    }
+    else
+        printf("Dumping the bdd! \n");
+
+
+    ddnodearray[0] = dd;
+    Cudd_DumpDot(gbm, 1, ddnodearray, NULL, NULL, outfile); // dump the function to .dot file
+    free(ddnodearray);
+    fclose (outfile); // close the file */
+}
+
+
+void test_bdd(DdManager *manager)
+{
+
+    DdNode * f;
+    DdNode * x[4];
+    DdNode * y[4];
+    int i;
+    DdNode * tmp1;
+    DdNode * tmp2;
+    FILE * fp;
+    char * names[8] = { "x1", "x2", "x3", "x4", "y1", "y2", "y3", "y4" };
+    int order[8];
+    DdNode **ddnodearray;
+
+    /* Initialize the bdd manager with default options */
+    //manager = Cudd_Init(0,0,CUDD_UNIQUE_SLOTS,CUDD_CACHE_SLOTS,0);
+
+
+
+    /* each new variable is put at the new of the current order */
+    for(i=0;i<4;i++) {
+        x[i] = Cudd_bddNewVar(manager);
+    }
+
+    for(i=0;i<4;i++) {
+        y[i] = Cudd_bddNewVar(manager);
+    }
+
+
+    /* ordering = x1 < x2 < x3 < x4 < y1 < y2 < y3 < y4 */
+
+    f = Cudd_ReadTrue(manager);
+    Cudd_Ref(f);                      /* Explicit Reference */
+
+    for(i=0;i<4;i++) {
+
+        tmp1 = Cudd_bddXnor(manager,x[i],y[i]);        /* x[i] <=> y[i] */
+        Cudd_Ref(tmp1);
+
+        tmp2 = Cudd_bddAnd(manager,f,tmp1);
+        Cudd_Ref(tmp2);
+
+        Cudd_RecursiveDeref(manager,f);                 /* Explicit Dereference */
+        Cudd_RecursiveDeref(manager,tmp1);
+
+        f = tmp2;
+    }
+
+    /* dumping bdd in dot format */
+    ddnodearray = (DdNode**)malloc(sizeof(DdNode*)); // initialize the function array
+    ddnodearray[0] = f;
+    fp = fopen("/mnt/d/WSL/NuSMV-2.6.0-MultiCE/NuSMV/test/f1.dot","w");
+    Cudd_DumpDot(manager,1,ddnodearray,NULL,NULL,fp);
+    fclose(fp);
+
+    printf("Number of Nodes = %d\n",Cudd_DagSize(f));
+
+
+    /* xi and yi are put together in order */
+    for(i=0;i<4;i= i++) {
+        order[2* i] = i;
+        order[2* i + 1] = i + 4;
+    }
+
+    /* shuffle to new order */
+    Cudd_ShuffleHeap(manager,order);
+
+
+    /* dumping bdd in dot format */
+    fp = fopen("/mnt/d/WSL/NuSMV-2.6.0-MultiCE/NuSMV/test/f2.dot","w");
+    Cudd_DumpDot(manager,1,&f,NULL,NULL,fp);
+    fclose(fp);
+
+
+    printf("Number of Nodes After Shuffling = %d\n",Cudd_DagSize(f));
+
+    Cudd_RecursiveDeref(manager,f);
+    Cudd_Quit(manager);    /* Release Manager */
+
+}
+
+
+int print_add_dot(BddEnc_ptr enc,add_ptr add,char * filename)
+{
+    AddArray_ptr addarray;
+    const char** labels;
+    FILE *fp;
+    int res;
+
+    addarray = AddArray_create(1);
+    AddArray_set_n(addarray, 0, add);
+    labels = ALLOC(const char*, 1);
+    labels[0]=util_strsav("result");
+
+    fp = fopen(filename, "w");
+
+    if (fp == NULL)
+        printf("fail to open the file! \n");
+    else
+        printf("The file is open! \n");
+
+
+    res = BddEnc_dump_addarray_dot(enc, addarray, NULL, fp);
+}

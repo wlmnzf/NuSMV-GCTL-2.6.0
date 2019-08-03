@@ -1,0 +1,38 @@
+digraph "DD" {
+size = "7.5,10"
+center = true;
+edge [dir = none];
+{ node [shape = plaintext];
+  edge [style = invis];
+  "CONST NODES" [style = invis];
+" state.1 " -> " next(state.1) " -> " next(state.0) " -> "CONST NODES"; 
+}
+{ rank = same; node [shape = box]; edge [style = invis];
+"  Trans  "; }
+{ rank = same; " state.1 ";
+"78";
+}
+{ rank = same; " next(state.1) ";
+"77";
+}
+{ rank = same; " next(state.0) ";
+"76";
+"62";
+}
+{ rank = same; "CONST NODES";
+{ node [shape = box]; "53" [label = "TRUE"];
+"54" [label = "FALSE"];
+}
+}
+"  Trans  " -> "78" [style = solid];
+"78" -> "62";
+"78" -> "77" [style = dashed];
+"77" -> "54";
+"77" -> "76" [style = dashed];
+"76" -> "54";
+"76" -> "53" [style = dashed];
+"62" -> "53";
+"62" -> "54" [style = dashed];
+"53" [label = "TRUE"];
+"54" [label = "FALSE"];
+}

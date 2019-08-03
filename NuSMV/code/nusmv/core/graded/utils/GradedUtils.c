@@ -341,14 +341,49 @@ bdd_ptr GradedUtils_andTransition(BddFsm_ptr fsm, bdd_ptr states) {
 	return result;
 }
 
-bdd_ptr GradedUtils_getCleanTransition(DDMgr_ptr dd, Cluster_ptr cluster) {
+bdd_ptr GradedUtils_getCleanTransition(DDMgr_ptr dd,BddFsm_ptr fsm, Cluster_ptr cluster) {
+    //Cluster_get_quantification_state_input
+    //Returns a pointer to the list of variables (both state and input vars) to be quantified.
+    //Returns a pointer to the list of variables to be quantified respect to the transition relation inside the cluster. Returned bdd is referenced.
     bdd_ptr state_input_vars = Cluster_get_quantification_state_input(cluster);
+
+    //Returns a pointer to the list of variables (state vars only) to be quantified.
+    //Returned value is referenced
     bdd_ptr state_vars = Cluster_get_quantification_state(cluster);
+    //forsome:state_vars是一些元素的合取范式，例如x0 x1 x2的合取范式， bdd some表示 存在x0，x1，x2 使得state_input_vars
+
+
+
+
+
+
     bdd_ptr input_vars = bdd_forsome(dd, state_input_vars, state_vars);
+
     
     bdd_ptr transition = Cluster_get_trans(cluster);
     
     bdd_ptr result = bdd_forsome(dd, transition, input_vars);
+
+    /*ssssss*/
+//    BddEnc_ptr enc = BddFsm_get_bdd_encoding(fsm);
+//    SymbTable_ptr st = BaseEnc_get_symb_table(BASE_ENC(enc));
+//    const NuSMVEnv_ptr env = EnvObject_get_environment(ENV_OBJECT(enc));
+//    const StreamMgr_ptr streams =
+//            STREAM_MGR(NuSMVEnv_get_value(env, ENV_STREAM_MANAGER));
+//    const OStream_ptr outstream = StreamMgr_get_output_ostream(streams);
+//
+//
+//    array_t* ls = SymbTable_get_class_layer_names(st,(const char*) NULL);
+//    NodeList_ptr sym=SymbTable_get_layers_sf_i_symbols(st, ls);
+//    node_ptr valueList = BddEnc_assign_symbols(enc, state_vars,sym ,false, (bdd_ptr*)NULL);
+//    node_ptr valueList1 = BddEnc_assign_symbols(enc, input_vars,sym ,false, (bdd_ptr*)NULL);
+//
+//    BddEnc_print_vars_in_cube(enc,state_vars,valueList,outstream);
+//    BddEnc_print_vars_in_cube(enc,input_vars,valueList1,outstream);
+
+/*ssssss*/
+
+
     
     bdd_free(dd, state_input_vars);
     bdd_free(dd, state_vars);
@@ -387,7 +422,7 @@ BddStates * GradedUtils_euGetIntermediateSets(BddFsm_ptr fsm, BddStates f, BddSt
 	bdd_ptr contributors, contributors_tmp, old_contributors;
 	int i;
 
-	count_paths = add_zero(dd);
+	count_paths = add_false(dd);
 	
 	contributors_tmp = (bdd_ptr) eu(fsm, f, g);
 	contributors = BddEnc_apply_state_frozen_vars_mask_bdd(enc, contributors_tmp);
@@ -446,7 +481,7 @@ BddStates * GradedUtils_egGetIntermediateSets(BddFsm_ptr fsm, BddStates f, int k
 	bdd_ptr contributors, contributors_tmp, old_contributors;
 	int i;
 
-	count_paths = add_zero(dd);
+	count_paths = add_false(dd);
 	
 	contributors_tmp = (bdd_ptr) eg(fsm, f);
 	contributors = BddEnc_apply_state_frozen_vars_mask_bdd(enc, contributors_tmp);
@@ -571,6 +606,7 @@ void GradedUtils_stampaPathsRecur(BddFsm_ptr fsm, BddEnc_ptr enc, treeNode_ptr a
 	  printf("Loop starts here\n");
 	else if (cicli[*nTraccia-1].nStato == nStato && !cicli[*nTraccia-1].sink)
 	  printf("End loop\n");
+
 	printf("-> Input: %d.%d <-\n", (*nTraccia), nStato);
 	if(input != ((bdd_ptr) 0)) {
 	  BddEnc_print_bdd_begin(enc, input_stampa, 1);
@@ -823,6 +859,21 @@ Lista dei parametri:
 
 Tipo di ritorno:
 	add_ptr		Un add che rappresenta il numero di successori che ogni stato della fsm ha nell'insieme states
+
+
+English version：
+
+Given a finite state machine with set of states S and transition function T and a subset X of S, this function calculates
+the number of successors that each state of S has in X according to the transition function T.
+
+List of parameters:
+BddFsm_ptr fsm Finite state machine to count successors
+bdd_ptr states The set of states in which to count successors
+
+Return type:
+add_ptr An ADD that represents the number of successors that each state of the fsm has in the set states
+计算状态集S中每个状态的后继数目（这些后继要求在X中）
+ S输入fsm, X是states
 */
 
 add_ptr GradedUtils_fsmCountSuccessors(BddFsm_ptr fsm, bdd_ptr states, int k) {
@@ -830,51 +881,90 @@ add_ptr GradedUtils_fsmCountSuccessors(BddFsm_ptr fsm, bdd_ptr states, int k) {
 	DDMgr_ptr dd = BddEnc_get_dd_manager(enc);
 	BddTrans_ptr trans = BddFsm_get_trans(fsm);	
 	ClusterList_ptr cluster_list = BddTrans_get_backward(trans);
+
+    const NuSMVEnv_ptr env = EnvObject_get_environment(ENV_OBJECT(enc));
+    const StreamMgr_ptr streams =
+            STREAM_MGR(NuSMVEnv_get_value(env, ENV_STREAM_MANAGER));
+    const OStream_ptr outstream = StreamMgr_get_output_ostream(streams);
+	//反向搜索的关系迁移
     bdd_ptr sum_variable;
 	
 	bdd_ptr primed_states;
+    bdd_ptr states_add;
 	add_ptr transition, result;
 	ClusterListIterator_ptr iter;
 	Cluster_ptr cluster;
+
+
 	int i=0;
-	
+
+
 	primed_states = BddEnc_state_var_to_next_state_var(enc, states);
+    states_add = Cudd_BddToAdd(dd->dd, states);
+   // write_dd(dd->dd, states_add, "/mnt/d/WSL/NuSMV-2.6.0-MultiCE/NuSMV/test/states.dot");  /*Write the resulting cascade dd to a file*/
+//    write_dd(dd->dd, primed_states, "/mnt/d/WSL/NuSMV-2.6.0-MultiCE/NuSMV/test/primed_states.dot");  /*Write the resulting cascade dd to a file*/
+
 	result = bdd_to_add(dd, primed_states);
-	bdd_free(dd, primed_states);
-	
-	 sum_variable = bdd_true(dd);
+
+
+
+	/*******Print_test*******************************************/
+	print_add_dot(enc,states_add,"/mnt/d/WSL/NuSMV-2.6.0-MultiCE/NuSMV/test/rt.dot");
+	print_add_dot(enc,result,"/mnt/d/WSL/NuSMV-2.6.0-MultiCE/NuSMV/test/nrt.dot");
+    //write_dd(dd->dd, result, "/mnt/d/WSL/NuSMV-2.6.0-MultiCE/NuSMV/test/result.dot");  /*Write the resulting cascade dd to a file*/
+	dd_printminterm(dd, primed_states);
+	/************************************************************/
+
+
+
+
+//    return result;
+//	printf("/***********states （GradedUtils_fsmCountSuccessors）**********/\n");
+//	BddEnc_print_set_of_states(enc, states, false,true, (VPFNNF) NULL,outstream,NULL);
+//	printf("/***********states （GradedUtils_fsmCountSuccessors）**********/\n");
+//
+//    printf("/***********result （GradedUtils_fsmCountSuccessors）**********/\n");
+//    BddEnc_print_set_of_states(enc, primed_states, false,true, (VPFNNF) NULL,outstream,NULL);
+//    printf("/***********result （GradedUtils_fsmCountSuccessors）**********/\n");
+
+    bdd_free(dd, primed_states);
+
+    sum_variable = bdd_true(dd);
 	iter = ClusterList_begin(cluster_list);
+
+	//遍历transition  relation
 	while ( ! ClusterListIterator_is_end(iter) ) {
 		cluster = ClusterList_get_cluster(cluster_list, iter);
-		
+
 		{
-			bdd_ptr tmp1 = GradedUtils_getCleanTransition(dd, cluster);
+			bdd_ptr tmp1 = GradedUtils_getCleanTransition(dd,fsm, cluster);
 			//GradedUtils_applyReachableAndMaskToBackTransitions(fsm, &tmp1);
-			transition = bdd_to_add(dd, tmp1);						
+			transition = bdd_to_add(dd, tmp1);
 			bdd_free(dd, tmp1);
 		}
-		
+
 		{
 			//add_ptr tmpb = GradedUtils_addApply(dd, DD_ADD_NODE_TIMES_TAG, result, transition, k);
-						
+
 			bdd_ptr cur_var = Cluster_get_quantification_state(cluster);
 			bdd_ptr state_vars_primed = bdd_forsome(dd, cur_var, sum_variable);
-			
+
 			//add_ptr tmp_result = GradedUtils_addAbstract(dd, tmpb, state_vars_primed, k);
-						
+
 			add_ptr tmp_result = GradedUtils_AddAndAbstract(dd, result, transition, state_vars_primed, k);
 			add_free(dd, result);
 			result = add_dup(tmp_result);
-			
+
 			bdd_and_accumulate(dd, &sum_variable, state_vars_primed);
-			
+			//交操作，sum刚开始是true所以结果是state_vars_primed，然后不断地取交集
+
 			add_free(dd, tmp_result);
 			bdd_free(dd, cur_var);
 			bdd_free(dd, state_vars_primed);
 			add_free(dd, transition);
 		}
-		
-		iter = ClusterListIterator_next(iter); 
+
+		iter = ClusterListIterator_next(iter);
 	} /* iteration */
 	
 	/*bdd_ptr primed_vars = BddEnc_get_next_state_vars_cube(enc);
@@ -1076,9 +1166,9 @@ int n)
     }
 
     /* Build result BDD. */
-    old = Cudd_ReadOne(dd->dd);
+    old = Cudd_ReadTrue(dd->dd);
     cuddRef(old);
-    zero = Cudd_Not(Cudd_ReadOne(dd->dd));
+    zero = Cudd_Not(Cudd_ReadTrue(dd->dd));
 
     for (i = 0; i < n; i++) {
 	if (string[indices[i]] == 0) {
@@ -1177,7 +1267,7 @@ GradedUtils_AddAndAbstractRecur(
     DdNode *r, *t, *e;
     unsigned int topf, topg, topcube, top, index;
 
-    statLine(manager);
+    statLine(manager->dd);
 	
 	
 	

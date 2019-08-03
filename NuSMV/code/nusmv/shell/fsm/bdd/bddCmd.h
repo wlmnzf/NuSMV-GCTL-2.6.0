@@ -51,6 +51,12 @@
 /* Function prototypes                                                       */
 /*---------------------------------------------------------------------------*/
 
+
+
+int CommandDumpFsm(NuSMVEnv_ptr env, int argc, char** argv);
+
+
+
 /*!
   \brief Initializes the BddFsm package.
 

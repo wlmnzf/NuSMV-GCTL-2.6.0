@@ -900,6 +900,7 @@ bdd_ptr add_to_bdd(DDMgr_ptr dd, add_ptr fn)
   return((bdd_ptr)result);
 }
 
+//Converts an ADD to a BDD by replacing all discriminants greater than value k with 1, and all other discriminants with 0. Returns a pointer to the resulting BDD if successful; a failure is generated otherwise.
 bdd_ptr add_to_bdd_strict_threshold(DDMgr_ptr dd, add_ptr fn, int k)
 {
   const NuSMVEnv_ptr env = EnvObject_get_environment(ENV_OBJECT(dd));
@@ -1313,7 +1314,7 @@ bdd_ptr bdd_not(DDMgr_ptr dd, bdd_ptr fn)
     ERROR_MGR(NuSMVEnv_get_value(env, ENV_ERROR_MANAGER));
   DdNode * result;
 
-  printf("NOT\n");
+//  printf("NOT\n");
   result = Cudd_Not(fn);
   common_error(errmgr, result, "bdd_not: result == NULL");
   Cudd_Ref(result);
@@ -1432,6 +1433,7 @@ bdd_ptr bdd_forsome(DDMgr_ptr dd, bdd_ptr fn, bdd_ptr cube)
     ERROR_MGR(NuSMVEnv_get_value(env, ENV_ERROR_MANAGER));
   DdNode * result;
 
+  //Existentially abstracts all the variables in cube from f. Returns the abstracted BDD if successful; NULL otherwise
   result = Cudd_bddExistAbstract(dd->dd, (DdNode *)fn, (DdNode *)cube);
   common_error(errmgr, result, "bdd_forsome: result = NULL");
   Cudd_Ref(result);

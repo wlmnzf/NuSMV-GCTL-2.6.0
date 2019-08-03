@@ -43,6 +43,7 @@
 #include "nusmv/core/node/NodeMgr.h"
 #include "nusmv/core/utils/ErrorMgr.h"
 #include "nusmv/core/node/NodeMgr.h"
+#include "nusmv/shell/fsm/bdd/bddCmd.h"
 
 #include "nusmv/core/graded/mc/Eval.h"
 #include "nusmv/core/graded/mc/Explain.h"

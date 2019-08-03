@@ -1,19 +1,18 @@
 MODULE main
 VAR
-state:{1,2,3,4,5,6};
-
+state:{1,2,3,4};
+--test:1..4;
 ASSIGN
-init(state):=1;
+init(state):=2;
+--init(test):=1;
 next(state):=case
-			 state=1:2;
-             state=2:3;
-             state=3:{4,5};
-             state=4:{6};
-             state=5:{4};
-             state=6:1;
+			 state=2:{4,3};
+             state=4:{4,3};
+             state=3:1;
+             state=1:1;
 			TRUE : state;
 		esac;
 
-CTLGRADSPEC !EF 1 (state=6)
+CTLGRADSPEC !EF 1 (state=1)
 --SPEC !EF(state=6)
 

@@ -20,7 +20,7 @@
 
   For more information on NuSMV see <http://nusmv.fbk.eu>
   or email to <nusmv-users@fbk.eu>.
-  Please report bugs to <nusmv-users@fbk.eu>.
+  Please report bugs to <nusmv-users@fbk.eu>.Simulate_CmdPickOneState
 
   To contact the NuSMV development board, email to <nusmv@fbk.eu>. 
 

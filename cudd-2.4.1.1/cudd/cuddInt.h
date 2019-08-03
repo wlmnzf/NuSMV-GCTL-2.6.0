@@ -805,6 +805,12 @@ typedef struct DdLevelQueue {
 
 
 /* Graded CTL package of NuSMV: added begin */
+
+
+
+
+
+
 /**Macro***********************************************************************
 
   Synopsis    [Hash function for the graded cache.]
@@ -1211,7 +1217,11 @@ extern void cuddCacheResize (DdManager *table);
 extern void cuddCacheFlush (DdManager *table);
 extern int cuddComputeFloorLog2 (unsigned int value);
 
-
+extern int
+Cudd_bddPickOneCubeNR(
+        DdManager *ddm,
+        DdNode    *node,
+        char      *string);
 
 
 /* Graded CTL package of NuSMV: added begin */

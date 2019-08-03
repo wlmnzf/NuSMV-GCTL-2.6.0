@@ -96,6 +96,7 @@ void Mc_CheckCTLSpec(NuSMVEnv_ptr env, Prop_ptr prop)
     OPTS_HANDLER(NuSMVEnv_get_value(env, ENV_OPTS_HANDLER));
   const NodeMgr_ptr nodemgr =
     NODE_MGR(NuSMVEnv_get_value(env, ENV_NODE_MGR));
+  const OStream_ptr outstream = StreamMgr_get_output_ostream(streams);
 
   if (opt_verbose_level_gt(opts, 0)) {
     Logger_ptr logger = LOGGER(NuSMVEnv_get_value(env, ENV_LOGGER));
@@ -124,6 +125,10 @@ void Mc_CheckCTLSpec(NuSMVEnv_ptr env, Prop_ptr prop)
   bdd_free(dd, s0);
 
   s0 = BddFsm_get_init(fsm);
+  BddEnc_print_set_of_states(enc, s0 , false,true, (VPFNNF) NULL,
+                             outstream,NULL);
+  BddEnc_print_set_of_states(enc, tmp_2 , false,true, (VPFNNF) NULL,
+                             outstream,NULL);
   bdd_and_accumulate(dd, &s0, tmp_2);
   bdd_free(dd, tmp_2);
 
@@ -132,6 +137,7 @@ void Mc_CheckCTLSpec(NuSMVEnv_ptr env, Prop_ptr prop)
   print_spec(StreamMgr_get_output_ostream(streams),
              prop, get_prop_print_method(opts));
 
+
   if (bdd_is_false(dd, s0)) {
     StreamMgr_print_output(streams,  "is true\n");
     Prop_set_status(prop, Prop_True);
@@ -139,6 +145,9 @@ void Mc_CheckCTLSpec(NuSMVEnv_ptr env, Prop_ptr prop)
   else {
     StreamMgr_print_output(streams,  "is false\n");
     Prop_set_status(prop, Prop_False);
+
+//    printf("mau prima\n");
+//		dd_printminterm(dd, s0);
 
     if (opt_counter_examples(opts)) {
       char* trace_title = NULL;
