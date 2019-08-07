@@ -894,22 +894,25 @@ add_ptr GradedUtils_fsmCountSuccessors(BddFsm_ptr fsm, bdd_ptr states, int k) {
 	add_ptr transition, result;
 	ClusterListIterator_ptr iter;
 	Cluster_ptr cluster;
+	int index;
+	DdNode* result_max, * state_vars_primed_max,* transition_max,* tmp_result_max;
+
 
 
 	int i=0;
 
 
 	primed_states = BddEnc_state_var_to_next_state_var(enc, states);
-    states_add = Cudd_BddToAdd(dd->dd, states);
+//	states_add = Cudd_BddToAdd(dd->dd, states);
    // write_dd(dd->dd, states_add, "/mnt/d/WSL/NuSMV-2.6.0-MultiCE/NuSMV/test/states.dot");  /*Write the resulting cascade dd to a file*/
 //    write_dd(dd->dd, primed_states, "/mnt/d/WSL/NuSMV-2.6.0-MultiCE/NuSMV/test/primed_states.dot");  /*Write the resulting cascade dd to a file*/
-
-	result = bdd_to_add(dd, primed_states);
+//    print_add_dot(enc,states_add,"/mnt/d/WSL/NuSMV-2.6.0-MultiCE/NuSMV/test/add.dot");
+	result = bdd_to_add(dd, states);
 
 
 
 	/*******Print_test*******************************************/
-	print_add_dot(enc,states_add,"/mnt/d/WSL/NuSMV-2.6.0-MultiCE/NuSMV/test/rt.dot");
+	//print_add_dot(enc,states_add,"/mnt/d/WSL/NuSMV-2.6.0-MultiCE/NuSMV/test/rt.dot");
 	print_add_dot(enc,result,"/mnt/d/WSL/NuSMV-2.6.0-MultiCE/NuSMV/test/nrt.dot");
     //write_dd(dd->dd, result, "/mnt/d/WSL/NuSMV-2.6.0-MultiCE/NuSMV/test/result.dot");  /*Write the resulting cascade dd to a file*/
 	dd_printminterm(dd, primed_states);
@@ -931,7 +934,7 @@ add_ptr GradedUtils_fsmCountSuccessors(BddFsm_ptr fsm, bdd_ptr states, int k) {
 
     sum_variable = bdd_true(dd);
 	iter = ClusterList_begin(cluster_list);
-
+	index=0;
 	//遍历transition  relation
 	while ( ! ClusterListIterator_is_end(iter) ) {
 		cluster = ClusterList_get_cluster(cluster_list, iter);
@@ -948,10 +951,25 @@ add_ptr GradedUtils_fsmCountSuccessors(BddFsm_ptr fsm, bdd_ptr states, int k) {
 
 			bdd_ptr cur_var = Cluster_get_quantification_state(cluster);
 			bdd_ptr state_vars_primed = bdd_forsome(dd, cur_var, sum_variable);
+            add_ptr tmp_result;
+			//sum_variable=true则返回cur_var
 
 			//add_ptr tmp_result = GradedUtils_addAbstract(dd, tmpb, state_vars_primed, k);
 
-			add_ptr tmp_result = GradedUtils_AddAndAbstract(dd, result, transition, state_vars_primed, k);
+            result_max=Cudd_addFindMax(dd->dd,(DdNode *)result);
+            transition_max=Cudd_addFindMax(dd->dd,(DdNode *)transition);
+            state_vars_primed_max=Cudd_addFindMax(dd->dd,(DdNode *)bdd_to_add(dd,state_vars_primed));
+
+            printf("result%d:%d\n",index,cuddV(result_max)->left.inttype);
+            printf("transition%d:%d\n",index,cuddV(transition_max)->left.inttype);
+            printf("state_vars_primed%d:%d\n",index,cuddV(state_vars_primed_max)->left.inttype);
+
+
+            tmp_result = GradedUtils_AddAndAbstract(dd, result, transition, state_vars_primed, k);
+
+			tmp_result_max=Cudd_addFindMax(dd->dd,(DdNode *)tmp_result);
+			printf("tmp_result%d:%d\n",index,cuddV(tmp_result_max)->left.inttype);
+
 			add_free(dd, result);
 			result = add_dup(tmp_result);
 
@@ -965,6 +983,7 @@ add_ptr GradedUtils_fsmCountSuccessors(BddFsm_ptr fsm, bdd_ptr states, int k) {
 		}
 
 		iter = ClusterListIterator_next(iter);
+	    index++;
 	} /* iteration */
 	
 	/*bdd_ptr primed_vars = BddEnc_get_next_state_vars_cube(enc);

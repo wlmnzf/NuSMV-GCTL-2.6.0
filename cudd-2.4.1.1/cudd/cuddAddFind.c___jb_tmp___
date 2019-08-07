@@ -140,6 +140,7 @@ Cudd_addFindMax(
 
 //    res = (cuddV(t) >= cuddV(e)) ? t : e;
     res = ( ((struct node_cudd *)(t->type.value))->left.inttype >= ((struct node_cudd *)(cuddV(e)))->left.inttype) ? t : e;
+    
     cuddCacheInsert1(dd,Cudd_addFindMax,f,res);
 
     return(res);

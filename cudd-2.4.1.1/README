@@ -22,7 +22,7 @@ flags.  Instructions are provided in the comments of the Makefile.
 You can always specify the options on the command line.  For instance,
 on some machines you can build a "fast" version of the program by typing:
 
-    make DDDEBUG= MTRDEBUG= ICFLAGS=-O2
+    make DDDEBUG= MTRDEBUG= ICFLAGS=-O0
 
 The Makefile supports several targets:
 
@@ -134,7 +134,7 @@ NOTES
     (*) C programs were compiled with g++, but linked with gcc.
 
     (**) Some old versions of the AIX cc compiler have buggy optimizers:
-    Try compiling with -O2 instead of -O3 if the program crashes.
+    Try compiling with -O0 instead of -O3 if the program crashes.
 
 Running lint and compiling with gcc -Wall still produces warnings.
 Running `purify' under Solaris 2.8 generates no messages.

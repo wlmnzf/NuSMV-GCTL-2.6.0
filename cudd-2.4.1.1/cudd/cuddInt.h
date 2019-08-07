@@ -541,6 +541,22 @@ typedef struct DdLevelQueue {
 #pragma pointer_size restore
 #endif
 
+
+
+union value_cudd {
+    int inttype;
+    struct node *nodetype;
+    struct string_ * strtype;
+    void * bddtype;
+};
+typedef union value_cudd node_val_cudd;
+struct node_cudd {
+    struct node *link;
+    short int type;
+    int lineno;
+    node_val_cudd left;
+    node_val_cudd right;
+};
 /*---------------------------------------------------------------------------*/
 /* Variable declarations                                                     */
 /*---------------------------------------------------------------------------*/

@@ -5,34 +5,76 @@ edge [dir = none];
 { node [shape = plaintext];
   edge [style = invis];
   "CONST NODES" [style = invis];
-" state.1 " -> " next(state.1) " -> " next(state.0) " -> "CONST NODES"; 
+" state.2 " -> " next(state.2) " -> " state.1 " -> " next(state.1) " -> " state.0 " -> " next(state.0) " -> "CONST NODES"; 
 }
 { rank = same; node [shape = box]; edge [style = invis];
 "  Trans  "; }
+{ rank = same; " state.2 ";
+"521";
+}
+{ rank = same; " next(state.2) ";
+"520";
+"51c";
+}
 { rank = same; " state.1 ";
-"78";
+"517";
+"51b";
+"51f";
 }
 { rank = same; " next(state.1) ";
-"77";
+"4e4";
+"516";
+"51a";
+"51e";
+}
+{ rank = same; " state.0 ";
+"4e8";
+"4fd";
+"519";
+"51d";
 }
 { rank = same; " next(state.0) ";
-"76";
-"62";
+"4ea";
+"518";
 }
 { rank = same; "CONST NODES";
-{ node [shape = box]; "53" [label = "TRUE"];
-"54" [label = "FALSE"];
+{ node [shape = box]; "4d3" [label = "TRUE"];
+"4d4" [label = "FALSE"];
 }
 }
-"  Trans  " -> "78" [style = solid];
-"78" -> "62";
-"78" -> "77" [style = dashed];
-"77" -> "54";
-"77" -> "76" [style = dashed];
-"76" -> "54";
-"76" -> "53" [style = dashed];
-"62" -> "53";
-"62" -> "54" [style = dashed];
-"53" [label = "TRUE"];
-"54" [label = "FALSE"];
+"  Trans  " -> "521" [style = solid];
+"521" -> "51c";
+"521" -> "520" [style = dashed];
+"520" -> "51f";
+"520" -> "517" [style = dashed];
+"51c" -> "517";
+"51c" -> "51b" [style = dashed];
+"517" -> "516";
+"517" -> "4d4" [style = dashed];
+"51b" -> "4d4";
+"51b" -> "51a" [style = dashed];
+"51f" -> "4e4";
+"51f" -> "51e" [style = dashed];
+"4e4" -> "4d3";
+"4e4" -> "4d4" [style = dashed];
+"516" -> "4d4";
+"516" -> "4ea" [style = dashed];
+"51a" -> "4fd";
+"51a" -> "519" [style = dashed];
+"51e" -> "4e8";
+"51e" -> "51d" [style = dashed];
+"4e8" -> "4d3";
+"4e8" -> "4d4" [style = dashed];
+"4fd" -> "4d4";
+"4fd" -> "4d3" [style = dashed];
+"519" -> "518";
+"519" -> "4d4" [style = dashed];
+"51d" -> "4d4";
+"51d" -> "518" [style = dashed];
+"4ea" -> "4d3";
+"4ea" -> "4d4" [style = dashed];
+"518" -> "4d4";
+"518" -> "4d3" [style = dashed];
+"4d3" [label = "TRUE"];
+"4d4" [label = "FALSE"];
 }
